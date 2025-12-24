@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\UrlStatus;
+use App\Observers\ShortUrlObserver;
 use Carbon\Carbon;
 use Database\Factories\ShortUrlFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  */
+#[ObservedBy(ShortUrlObserver::class)]
 final class ShortUrl extends Model
 {
     /** @use HasFactory<ShortUrlFactory> */
