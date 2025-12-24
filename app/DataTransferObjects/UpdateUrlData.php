@@ -13,6 +13,7 @@ final readonly class UpdateUrlData
         public ?string $originalUrl = null,
         public ?UrlStatus $status = null,
         public ?DateTimeInterface $expiresAt = null,
+        public bool $expiresAtWasSet = false,
     ) {}
 
     /**
@@ -30,6 +31,7 @@ final readonly class UpdateUrlData
             originalUrl: $data['original_url'] ?? null,
             status: $status,
             expiresAt: $data['expires_at'] ?? null,
+            expiresAtWasSet: array_key_exists('expires_at', $data),
         );
     }
 
@@ -37,6 +39,7 @@ final readonly class UpdateUrlData
     {
         return $this->originalUrl !== null
             || $this->status !== null
-            || $this->expiresAt !== null;
+            || $this->expiresAt !== null
+            || $this->expiresAtWasSet;
     }
 }
