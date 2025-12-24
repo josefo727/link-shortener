@@ -26,11 +26,12 @@ return [
     |
     */
     'code' => [
-        'length' => env('SHORTENER_CODE_LENGTH', 6),
+        'length' => (int) env('SHORTENER_CODE_LENGTH', 6),
+        // Alphabet without ambiguous characters: 0/O, 1/l/I, 2/Z, 5/S
         'alphabet' => env(
             'SHORTENER_CODE_ALPHABET',
-            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            'abcdefghjkmnpqrtuvwxyACDEFGHJKMNPQRTUVWXY346789'
         ),
-        'max_attempts' => env('SHORTENER_CODE_MAX_ATTEMPTS', 10),
+        'max_attempts' => (int) env('SHORTENER_CODE_MAX_ATTEMPTS', 10),
     ],
 ];
