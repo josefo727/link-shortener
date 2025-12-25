@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>José Gutiérrez - Desarrollo Web & Tecnología</title>
+    <title>José Rafael Gutierrez - Matemático & Desarrollador Web Full Stack</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,10 +30,10 @@
     <div class="max-w-4xl mx-auto px-4 py-16">
         <header class="text-center mb-16">
             <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
-                José Gutiérrez
+                José Rafael Gutierrez
             </h1>
             <p class="text-xl text-slate-400">
-                Desarrollador Web & Entusiasta de la Tecnología
+                Matemático Puro · Consultor & Desarrollador Web Full Stack
             </p>
         </header>
 
@@ -101,7 +101,7 @@
         </div>
 
         <footer class="mt-16 text-center text-slate-500 text-sm">
-            <p>&copy; {{ date('Y') }} José Gutiérrez. Todos los derechos reservados.</p>
+            <p>&copy; {{ date('Y') }} José Rafael Gutierrez. Todos los derechos reservados.</p>
         </footer>
     </div>
 </body>
