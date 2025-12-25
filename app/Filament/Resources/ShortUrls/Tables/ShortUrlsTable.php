@@ -24,12 +24,12 @@ final class ShortUrlsTable
     {
         return $table
             ->columns([
-                TextColumn::make('code')
-                    ->label('Codigo')
+                TextColumn::make('title')
+                    ->label('Titulo')
                     ->searchable()
                     ->sortable()
-                    ->copyable()
-                    ->copyMessage('Codigo copiado'),
+                    ->limit(50)
+                    ->tooltip(fn (ShortUrl $record): string => $record->title),
 
                 TextColumn::make('short_url')
                     ->label('URL Corta')
@@ -37,11 +37,20 @@ final class ShortUrlsTable
                     ->copyable()
                     ->copyMessage('URL copiada'),
 
+                TextColumn::make('code')
+                    ->label('Codigo')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable()
+                    ->copyMessage('Codigo copiado')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('original_url')
                     ->label('URL Original')
                     ->limit(50)
                     ->tooltip(fn (ShortUrl $record): string => $record->original_url)
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('status')
                     ->label('Estado')
@@ -51,18 +60,21 @@ final class ShortUrlsTable
                         UrlStatus::Active => 'success',
                         UrlStatus::Inactive => 'warning',
                         UrlStatus::Expired => 'danger',
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('clicks')
                     ->label('Clics')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('expires_at')
                     ->label('Expira')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->placeholder('Nunca'),
+                    ->placeholder('Nunca')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->label('Creado')

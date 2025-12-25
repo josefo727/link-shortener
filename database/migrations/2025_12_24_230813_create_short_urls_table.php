@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('short_urls', function (Blueprint $table): void {
             $table->id();
             $table->string('code', 10)->unique();
+            $table->string('title');
             $table->text('original_url');
             $table->string('original_url_hash', 64)->index();
             $table->string('status', 20)->default('active');

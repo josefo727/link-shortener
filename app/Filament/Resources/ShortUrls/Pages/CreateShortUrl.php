@@ -42,8 +42,12 @@ final class CreateShortUrl extends CreateRecord
         /** @var string $originalUrl */
         $originalUrl = $data['original_url'];
 
+        /** @var string|null $title */
+        $title = $data['title'] ?? null;
+
         $dto = new CreateUrlData(
             originalUrl: $originalUrl,
+            title: $title,
             status: $status,
             expiresAt: $expiresAt
         );

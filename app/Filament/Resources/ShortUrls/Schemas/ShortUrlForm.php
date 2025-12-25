@@ -18,6 +18,12 @@ final class ShortUrlForm
     {
         return $schema
             ->components([
+                TextInput::make('title')
+                    ->label('Titulo')
+                    ->helperText('Opcional. Si no se ingresa, se generara automaticamente desde la URL')
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+
                 TextInput::make('original_url')
                     ->label('URL Original')
                     ->helperText('Ingresa la URL que deseas acortar')

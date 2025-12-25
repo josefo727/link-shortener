@@ -43,6 +43,7 @@ final readonly class CreateShortUrlAction
 
         return ShortUrl::create([
             'code' => $code,
+            'title' => $data->title ?? '',
             'original_url' => $url,
             'original_url_hash' => $hash,
             'status' => $data->status,

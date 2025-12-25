@@ -35,6 +35,10 @@ final readonly class UpdateShortUrlAction
             $attributes['original_url_hash'] = ShortUrl::hashUrl($url);
         }
 
+        if ($data->titleWasSet && $data->title !== null && $data->title !== '') {
+            $attributes['title'] = $data->title;
+        }
+
         if ($data->status !== null) {
             $attributes['status'] = $data->status;
         }

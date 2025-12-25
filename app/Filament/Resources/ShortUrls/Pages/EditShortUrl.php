@@ -59,11 +59,16 @@ final class EditShortUrl extends EditRecord
         /** @var string|null $originalUrl */
         $originalUrl = $data['original_url'] ?? null;
 
+        /** @var string|null $title */
+        $title = $data['title'] ?? null;
+
         $dto = new UpdateUrlData(
             originalUrl: $originalUrl,
+            title: $title,
             status: $status,
             expiresAt: $expiresAt,
-            expiresAtWasSet: array_key_exists('expires_at', $data)
+            expiresAtWasSet: array_key_exists('expires_at', $data),
+            titleWasSet: array_key_exists('title', $data)
         );
 
         return $action->execute($record, $dto);

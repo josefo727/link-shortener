@@ -11,13 +11,14 @@ final readonly class CreateUrlData
 {
     public function __construct(
         public string $originalUrl,
+        public ?string $title = null,
         public ?string $customCode = null,
         public UrlStatus $status = UrlStatus::Active,
         public ?DateTimeInterface $expiresAt = null,
     ) {}
 
     /**
-     * @param  array{original_url: string, custom_code?: string|null, status?: UrlStatus|string, expires_at?: DateTimeInterface|null}  $data
+     * @param  array{original_url: string, title?: string|null, custom_code?: string|null, status?: UrlStatus|string, expires_at?: DateTimeInterface|null}  $data
      */
     public static function fromArray(array $data): self
     {
@@ -29,6 +30,7 @@ final readonly class CreateUrlData
 
         return new self(
             originalUrl: $data['original_url'],
+            title: $data['title'] ?? null,
             customCode: $data['custom_code'] ?? null,
             status: $status,
             expiresAt: $data['expires_at'] ?? null,

@@ -74,6 +74,24 @@ describe('ListShortUrls Page', function (): void {
             ->assertSee('active1')
             ->assertDontSee('inactive1');
     });
+
+    it('displays titles in the table', function (): void {
+        ShortUrl::factory()->withTitle('Mi enlace importante')->create();
+
+        Livewire::test(ListShortUrls::class)
+            ->assertSuccessful()
+            ->assertSee('Mi enlace importante');
+    });
+
+    it('can search by title', function (): void {
+        ShortUrl::factory()->withTitle('Laravel Documentation')->create();
+        ShortUrl::factory()->withTitle('React Tutorial')->create();
+
+        Livewire::test(ListShortUrls::class)
+            ->searchTable('Laravel')
+            ->assertSee('Laravel Documentation')
+            ->assertDontSee('React Tutorial');
+    });
 });
 
 describe('CreateShortUrl Page', function (): void {
@@ -149,6 +167,33 @@ describe('CreateShortUrl Page', function (): void {
 
         $shortUrl = ShortUrl::first();
         expect($shortUrl->expires_at)->not->toBeNull();
+    });
+
+    it('can create with custom title', function (): void {
+        Livewire::test(CreateShortUrl::class)
+            ->fillForm([
+                'title' => 'Mi titulo personalizado',
+                'original_url' => 'https://example.com/path',
+                'status' => UrlStatus::Active->value,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $shortUrl = ShortUrl::first();
+        expect($shortUrl->title)->toBe('Mi titulo personalizado');
+    });
+
+    it('auto-generates title from url when not provided', function (): void {
+        Livewire::test(CreateShortUrl::class)
+            ->fillForm([
+                'original_url' => 'https://example.com/docs/api',
+                'status' => UrlStatus::Active->value,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $shortUrl = ShortUrl::first();
+        expect($shortUrl->title)->toBe('docs/api');
     });
 });
 
@@ -260,6 +305,30 @@ describe('EditShortUrl Page', function (): void {
 
         Livewire::test(EditShortUrl::class, ['record' => $shortUrl->getRouteKey()])
             ->assertSuccessful();
+    });
+
+    it('can update title', function (): void {
+        $shortUrl = ShortUrl::factory()->withTitle('Titulo original')->create();
+
+        Livewire::test(EditShortUrl::class, ['record' => $shortUrl->getRouteKey()])
+            ->fillForm([
+                'title' => 'Titulo actualizado',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $shortUrl->refresh();
+        expect($shortUrl->title)->toBe('Titulo actualizado');
+    });
+
+    it('displays current title in form', function (): void {
+        $shortUrl = ShortUrl::factory()->withTitle('Mi titulo')->create();
+
+        Livewire::test(EditShortUrl::class, ['record' => $shortUrl->getRouteKey()])
+            ->assertFormFieldExists('title')
+            ->assertFormSet([
+                'title' => 'Mi titulo',
+            ]);
     });
 });
 

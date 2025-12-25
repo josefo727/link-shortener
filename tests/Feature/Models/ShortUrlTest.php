@@ -156,3 +156,50 @@ it('uses soft deletes', function (): void {
     expect(ShortUrl::find($id))->toBeNull()
         ->and(ShortUrl::withTrashed()->find($id))->not->toBeNull();
 });
+
+describe('title auto-generation', function (): void {
+    it('generates title from url path when not provided', function (): void {
+        $shortUrl = ShortUrl::factory()
+            ->withUrl('https://example.com/docs/api-reference')
+            ->withoutTitle()
+            ->create();
+
+        expect($shortUrl->title)->toBe('docs/api-reference');
+    });
+
+    it('uses host when url has no path', function (): void {
+        $shortUrl = ShortUrl::factory()
+            ->withUrl('https://google.com')
+            ->withoutTitle()
+            ->create();
+
+        expect($shortUrl->title)->toBe('google.com');
+    });
+
+    it('uses host when path is only slash', function (): void {
+        $shortUrl = ShortUrl::factory()
+            ->withUrl('https://example.com/')
+            ->withoutTitle()
+            ->create();
+
+        expect($shortUrl->title)->toBe('example.com');
+    });
+
+    it('preserves custom title when provided', function (): void {
+        $shortUrl = ShortUrl::factory()
+            ->withUrl('https://example.com/path')
+            ->withTitle('Mi titulo personalizado')
+            ->create();
+
+        expect($shortUrl->title)->toBe('Mi titulo personalizado');
+    });
+
+    it('generates correct title from complex url', function (): void {
+        $shortUrl = ShortUrl::factory()
+            ->withUrl('https://github.com/laravel/framework')
+            ->withoutTitle()
+            ->create();
+
+        expect($shortUrl->title)->toBe('laravel/framework');
+    });
+});

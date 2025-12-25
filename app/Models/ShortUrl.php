@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @property int $id
  * @property string $code
+ * @property string $title
  * @property string $original_url
  * @property string $original_url_hash
  * @property UrlStatus $status
@@ -34,12 +35,39 @@ final class ShortUrl extends Model
 
     protected $fillable = [
         'code',
+        'title',
         'original_url',
         'original_url_hash',
         'status',
         'clicks',
         'expires_at',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (ShortUrl $shortUrl): void {
+            if (empty($shortUrl->title)) {
+                $shortUrl->title = self::generateTitleFromUrl($shortUrl->original_url);
+            }
+        });
+    }
+
+    /**
+     * Generate a title from the URL path.
+     */
+    public static function generateTitleFromUrl(string $url): string
+    {
+        $parsed = parse_url($url);
+
+        $path = $parsed['path'] ?? '';
+        $path = trim($path, '/');
+
+        if ($path !== '') {
+            return $path;
+        }
+
+        return $parsed['host'] ?? $url;
+    }
 
     /**
      * Generate SHA-256 hash for the original URL.

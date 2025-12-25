@@ -25,6 +25,7 @@ final class ShortUrlFactory extends Factory
 
         return [
             'code' => (new CodeGeneratorService)->generate(),
+            'title' => $this->faker->words(3, true),
             'original_url' => $url,
             'original_url_hash' => ShortUrl::hashUrl($url),
             'status' => UrlStatus::Active,
@@ -101,6 +102,26 @@ final class ShortUrlFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'code' => $code,
+        ]);
+    }
+
+    /**
+     * Set a specific title.
+     */
+    public function withTitle(string $title): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'title' => $title,
+        ]);
+    }
+
+    /**
+     * Set empty title to trigger auto-generation.
+     */
+    public function withoutTitle(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'title' => '',
         ]);
     }
 }
