@@ -28,16 +28,18 @@ final readonly class ShortUrlObserver
     {
         // If code changed, remove old code from cache
         if ($shortUrl->wasChanged('code')) {
-            /** @var string $oldCode */
             $oldCode = $shortUrl->getOriginal('code');
-            $this->cacheService->forgetByCode($oldCode);
+            if (is_string($oldCode)) {
+                $this->cacheService->forgetByCode($oldCode);
+            }
         }
 
         // If URL hash changed, remove old hash from cache
         if ($shortUrl->wasChanged('original_url_hash')) {
-            /** @var string $oldHash */
             $oldHash = $shortUrl->getOriginal('original_url_hash');
-            $this->forgetByHash($oldHash);
+            if (is_string($oldHash)) {
+                $this->forgetByHash($oldHash);
+            }
         }
 
         // Re-cache with new values
