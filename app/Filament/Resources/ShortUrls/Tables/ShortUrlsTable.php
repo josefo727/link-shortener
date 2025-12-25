@@ -66,8 +66,7 @@ final class ShortUrlsTable
                 TextColumn::make('clicks')
                     ->label('Clics')
                     ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
 
                 TextColumn::make('expires_at')
                     ->label('Expira')
