@@ -31,6 +31,7 @@ final class ShortUrl extends Model
 {
     /** @use HasFactory<ShortUrlFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     protected $fillable = [
@@ -42,15 +43,6 @@ final class ShortUrl extends Model
         'clicks',
         'expires_at',
     ];
-
-    protected static function booted(): void
-    {
-        static::creating(function (ShortUrl $shortUrl): void {
-            if (empty($shortUrl->title)) {
-                $shortUrl->title = self::generateTitleFromUrl($shortUrl->original_url);
-            }
-        });
-    }
 
     /**
      * Generate a title from the URL path.
@@ -155,6 +147,15 @@ final class ShortUrl extends Model
                 $q->whereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
             });
+    }
+
+    protected static function booted(): void
+    {
+        self::creating(function (ShortUrl $shortUrl): void {
+            if (empty($shortUrl->title)) {
+                $shortUrl->title = self::generateTitleFromUrl($shortUrl->original_url);
+            }
+        });
     }
 
     /**

@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use App\Models\ShortUrl;
-use App\Observers\ShortUrlObserver;
-use App\Services\CacheService;
 use Illuminate\Support\Facades\Cache;
 
 beforeEach(function (): void {

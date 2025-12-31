@@ -22,7 +22,7 @@ final readonly class RedirectController
 
             return redirect()->away($shortUrl->original_url, 301);
         } catch (UrlNotFoundException) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException;
         }
     }
 }

@@ -94,6 +94,37 @@ shorturl:code:{code}   -> Full ShortUrl JSON
 shorturl:hash:{hash}   -> Code lookup by URL hash
 ```
 
+## REST API
+
+Authentication via Laravel Sanctum Bearer tokens.
+
+### Endpoints
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/urls` | Create short URL (returns existing if URL exists) |
+| `PUT` | `/api/urls/{code}` | Update URL and/or title |
+| `DELETE` | `/api/urls/{code}` | Soft delete |
+
+### Generate API Token
+
+```bash
+./vendor/bin/sail artisan api:token:create user@example.com --name="my-app"
+```
+
+### Example Request
+
+```bash
+curl -X POST https://domain.com/api/urls \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"original_url": "https://example.com", "title": "My link", "expires_at": "2025-12-31"}'
+```
+
+### Rate Limiting
+
+60 requests/minute per authenticated user.
+
 ## Testing Approach (TDD)
 
 - **Unit tests** (`tests/Unit/`): Services, DTOs, isolated logic

@@ -14,7 +14,7 @@ describe('isEnabled', function (): void {
     it('returns true when cache is enabled in config', function (): void {
         config(['shortener.cache.enabled' => true]);
 
-        $service = new CacheService();
+        $service = new CacheService;
 
         expect($service->isEnabled())->toBeTrue();
     });
@@ -22,7 +22,7 @@ describe('isEnabled', function (): void {
     it('returns false when cache is disabled in config', function (): void {
         config(['shortener.cache.enabled' => false]);
 
-        $service = new CacheService();
+        $service = new CacheService;
 
         expect($service->isEnabled())->toBeFalse();
     });
@@ -33,7 +33,7 @@ describe('getByCode', function (): void {
         config(['shortener.cache.enabled' => true]);
         $shortUrl = ShortUrl::factory()->withCode('cached1')->make();
         $shortUrl->id = 999;
-        $service = new CacheService();
+        $service = new CacheService;
 
         // Put directly in cache (bypassing observer)
         Cache::put('shorturl:code:cached1', $shortUrl, 3600);
@@ -47,7 +47,7 @@ describe('getByCode', function (): void {
     it('returns from database when not in cache and caches it', function (): void {
         config(['shortener.cache.enabled' => true]);
         $shortUrl = ShortUrl::factory()->withCode('notcached')->create();
-        $service = new CacheService();
+        $service = new CacheService;
 
         $result = $service->getByCode('notcached');
 
@@ -61,7 +61,7 @@ describe('getByCode', function (): void {
 
     it('returns null when code does not exist', function (): void {
         config(['shortener.cache.enabled' => true]);
-        $service = new CacheService();
+        $service = new CacheService;
 
         $result = $service->getByCode('nonexistent');
 
@@ -71,7 +71,7 @@ describe('getByCode', function (): void {
     it('queries database directly when cache is disabled', function (): void {
         config(['shortener.cache.enabled' => false]);
         $shortUrl = ShortUrl::factory()->withCode('dbonly')->create();
-        $service = new CacheService();
+        $service = new CacheService;
 
         $result = $service->getByCode('dbonly');
 
@@ -89,7 +89,7 @@ describe('getCodeByHash', function (): void {
         config(['shortener.cache.enabled' => true]);
         $url = 'https://example.com/unique';
         $hash = ShortUrl::hashUrl($url);
-        $service = new CacheService();
+        $service = new CacheService;
 
         // Put directly in cache (bypassing observer)
         Cache::put("shorturl:hash:{$hash}", 'hashtest', 3600);
@@ -104,7 +104,7 @@ describe('getCodeByHash', function (): void {
         $url = 'https://example.com/unique2';
         $shortUrl = ShortUrl::factory()->withUrl($url)->withCode('hashdb')->create();
         $hash = ShortUrl::hashUrl($url);
-        $service = new CacheService();
+        $service = new CacheService;
 
         $result = $service->getCodeByHash($hash);
 
@@ -117,7 +117,7 @@ describe('getCodeByHash', function (): void {
 
     it('returns null when hash does not exist', function (): void {
         config(['shortener.cache.enabled' => true]);
-        $service = new CacheService();
+        $service = new CacheService;
         $hash = ShortUrl::hashUrl('https://nonexistent.com');
 
         $result = $service->getCodeByHash($hash);
@@ -132,7 +132,7 @@ describe('put', function (): void {
         $url = 'https://example.com/tostore';
         $shortUrl = ShortUrl::factory()->withUrl($url)->withCode('store1')->create();
         $hash = ShortUrl::hashUrl($url);
-        $service = new CacheService();
+        $service = new CacheService;
 
         $service->put($shortUrl);
 
@@ -145,7 +145,7 @@ describe('put', function (): void {
         $url = 'https://example.com/nostore';
         $shortUrl = ShortUrl::factory()->withUrl($url)->withCode('nostore')->create();
         $hash = ShortUrl::hashUrl($url);
-        $service = new CacheService();
+        $service = new CacheService;
 
         $service->put($shortUrl);
 
@@ -159,7 +159,7 @@ describe('put', function (): void {
         $shortUrl = ShortUrl::factory()->withCode('ttltest')->create();
 
         // We can't easily test TTL directly, but we can verify the cache works
-        $service = new CacheService();
+        $service = new CacheService;
         $service->put($shortUrl);
 
         expect(Cache::has('shorturl:code:ttltest'))->toBeTrue();
@@ -172,7 +172,7 @@ describe('forget', function (): void {
         $url = 'https://example.com/toforget';
         $shortUrl = ShortUrl::factory()->withUrl($url)->withCode('forget1')->create();
         $hash = ShortUrl::hashUrl($url);
-        $service = new CacheService();
+        $service = new CacheService;
 
         $service->put($shortUrl);
         expect(Cache::has('shorturl:code:forget1'))->toBeTrue();
@@ -187,7 +187,7 @@ describe('forget', function (): void {
     it('does nothing when cache is disabled', function (): void {
         config(['shortener.cache.enabled' => false]);
         $shortUrl = ShortUrl::factory()->withCode('noforget')->create();
-        $service = new CacheService();
+        $service = new CacheService;
 
         // This should not throw
         $service->forget($shortUrl);
@@ -200,7 +200,7 @@ describe('forgetByCode', function (): void {
     it('removes cached entry by code', function (): void {
         config(['shortener.cache.enabled' => true]);
         $shortUrl = ShortUrl::factory()->withCode('forgetcode')->create();
-        $service = new CacheService();
+        $service = new CacheService;
 
         $service->put($shortUrl);
         expect(Cache::has('shorturl:code:forgetcode'))->toBeTrue();
@@ -212,7 +212,7 @@ describe('forgetByCode', function (): void {
 
     it('does nothing when cache is disabled', function (): void {
         config(['shortener.cache.enabled' => false]);
-        $service = new CacheService();
+        $service = new CacheService;
 
         // This should not throw
         $service->forgetByCode('anycode');

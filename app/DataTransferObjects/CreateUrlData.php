@@ -18,7 +18,13 @@ final readonly class CreateUrlData
     ) {}
 
     /**
-     * @param  array{original_url: string, title?: string|null, custom_code?: string|null, status?: UrlStatus|string, expires_at?: DateTimeInterface|null}  $data
+     * @param array{
+     *     original_url: string,
+     *     title?: string|null,
+     *     custom_code?: string|null,
+     *     status?: UrlStatus|string,
+     *     expires_at?: DateTimeInterface|null
+     * } $data
      */
     public static function fromArray(array $data): self
     {

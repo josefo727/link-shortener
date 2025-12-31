@@ -69,6 +69,6 @@ final readonly class CreateShortUrlAction
         }
 
         // If we exhaust attempts, generate a longer code
-        return $this->codeGenerator->generate() . $this->codeGenerator->generate();
+        return $this->codeGenerator->generate().$this->codeGenerator->generate();
     }
 }

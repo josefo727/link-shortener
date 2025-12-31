@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\Url\CreateShortUrlAction;
 use App\DataTransferObjects\CreateUrlData;
 use App\Enums\UrlStatus;
-use App\Exceptions\Url\CodeAlreadyExistsException;
 use App\Exceptions\Url\InvalidUrlException;
 use App\Models\ShortUrl;
 
