@@ -30,5 +30,11 @@ npm install
 npm run build
 
 chown -R application:application .
+# Security: Lock down public/ to prevent webshell uploads
+# Root owns public/, PHP process (application user) can only read
+chown -R root:root public/
+find public/ -type d -exec chmod 755 {} \;
+find public/ -type f -exec chmod 644 {} \;
+
 
 php artisan up
