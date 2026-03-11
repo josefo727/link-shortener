@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ShortUrls\Tables;
 
+use App\Contracts\QrCodeGeneratorInterface;
 use App\Enums\UrlStatus;
 use App\Models\ShortUrl;
 use Filament\Actions\Action;
@@ -17,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ShortUrlsTable
 {
@@ -109,6 +111,38 @@ final class ShortUrlsTable
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->url(fn (ShortUrl $record): string => $record->original_url)
                     ->openUrlInNewTab(),
+                Action::make('download_qr_png')
+                    ->label('QR PNG')
+                    ->icon('heroicon-o-qr-code')
+                    ->action(function (ShortUrl $record): StreamedResponse {
+                        /** @var QrCodeGeneratorInterface $generator */
+                        $generator = app(QrCodeGeneratorInterface::class);
+                        $content = (string) url($record->code);
+
+                        return response()->streamDownload(
+                            function () use ($generator, $content): void {
+                                echo $generator->generatePng($content);
+                            },
+                            "qr-{$record->code}.png",
+                            ['Content-Type' => 'image/png'],
+                        );
+                    }),
+                Action::make('download_qr_svg')
+                    ->label('QR SVG')
+                    ->icon('heroicon-o-qr-code')
+                    ->action(function (ShortUrl $record): StreamedResponse {
+                        /** @var QrCodeGeneratorInterface $generator */
+                        $generator = app(QrCodeGeneratorInterface::class);
+                        $content = (string) url($record->code);
+
+                        return response()->streamDownload(
+                            function () use ($generator, $content): void {
+                                echo $generator->generateSvg($content);
+                            },
+                            "qr-{$record->code}.svg",
+                            ['Content-Type' => 'image/svg+xml'],
+                        );
+                    }),
                 EditAction::make()
                     ->label('Editar'),
             ])

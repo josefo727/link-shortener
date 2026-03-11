@@ -1,106 +1,118 @@
-# 📊 Development Progress
+# Development Progress
 
-## Current Status: 🟡 Setup Phase
+## Current Status: Phase 2 In Progress
 
-**Last Updated:** _Pending first update_
+**Last Updated:** 2026-03-11
 
 ---
 
-## Phase 1: Core URL Shortener
+## Phase 1: Core URL Shortener - COMPLETED
 
 ### Step 1: Project Foundation
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| Create Laravel 12 project | ⬜ Pending | - | - |
-| Configure database | ⬜ Pending | - | SQLite dev / PostgreSQL prod |
-| Configure Redis | ⬜ Pending | - | - |
-| Install Filament 4 | ⬜ Pending | - | - |
-| Setup Pint | ⬜ Pending | - | - |
-| Setup PHPStan | ⬜ Pending | - | Level 9 |
-| Setup PHPCS | ⬜ Pending | - | PSR-12 |
-| Create config/shortener.php | ⬜ Pending | - | - |
-| Create docs structure | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| Create Laravel 12 project | ✅ | With Sail (MySQL) |
+| Configure database | ✅ | MySQL dev / PostgreSQL prod |
+| Configure Redis | ✅ | Via Sail |
+| Install Filament 4 | ✅ | |
+| Setup Pint | ✅ | Laravel preset + strict rules |
+| Setup PHPStan | ✅ | Level 9 with Larastan |
+| Setup PHPCS | ✅ | PSR-12 |
+| Create config/shortener.php | ✅ | Cache, code generation settings |
+| Create docs structure | ✅ | |
 
 ### Step 2: Core Domain (TDD)
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| CodeGeneratorService tests | ⬜ Pending | - | - |
-| CodeGeneratorService implementation | ⬜ Pending | - | - |
-| UrlValidatorService tests | ⬜ Pending | - | - |
-| UrlValidatorService implementation | ⬜ Pending | - | - |
-| DTOs creation | ⬜ Pending | - | - |
-| UrlStatus enum | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| CodeGeneratorService tests | ✅ | |
+| CodeGeneratorService implementation | ✅ | 6-char, no ambiguous chars |
+| UrlValidatorService tests | ✅ | |
+| UrlValidatorService implementation | ✅ | |
+| DTOs creation | ✅ | CreateUrlData, UpdateUrlData |
+| UrlStatus enum | ✅ | active, inactive, expired |
 
 ### Step 3: Database Layer
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| Migration with indexes | ⬜ Pending | - | - |
-| ShortUrl model | ⬜ Pending | - | - |
-| ShortUrlFactory | ⬜ Pending | - | - |
-| Model unit tests | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| Migration with indexes | ✅ | code, hash, status, composite |
+| ShortUrl model | ✅ | Casts, scopes, soft deletes |
+| ShortUrlFactory | ✅ | |
+| Model unit tests | ✅ | |
 
 ### Step 4: Cache Layer (TDD)
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| CacheService tests | ⬜ Pending | - | - |
-| CacheService implementation | ⬜ Pending | - | - |
-| ShortUrlObserver | ⬜ Pending | - | - |
-| Observer tests | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| CacheService tests | ✅ | |
+| CacheService implementation | ✅ | Redis, 1-week TTL |
+| ShortUrlObserver | ✅ | Cache invalidation |
+| Observer tests | ✅ | |
 
 ### Step 5: Actions (TDD)
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| CreateShortUrlAction tests | ⬜ Pending | - | - |
-| CreateShortUrlAction | ⬜ Pending | - | - |
-| ResolveShortUrlAction tests | ⬜ Pending | - | - |
-| ResolveShortUrlAction | ⬜ Pending | - | - |
-| UpdateShortUrlAction tests | ⬜ Pending | - | - |
-| UpdateShortUrlAction | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| CreateShortUrlAction tests | ✅ | |
+| CreateShortUrlAction | ✅ | Deduplication via hash |
+| ResolveShortUrlAction tests | ✅ | |
+| ResolveShortUrlAction | ✅ | Cache-first lookup |
+| UpdateShortUrlAction tests | ✅ | |
+| UpdateShortUrlAction | ✅ | |
 
 ### Step 6: HTTP Layer (TDD)
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| Redirect endpoint tests | ⬜ Pending | - | - |
-| RedirectController | ⬜ Pending | - | - |
-| Route configuration | ⬜ Pending | - | - |
-| Error handling tests | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| Redirect endpoint tests | ✅ | |
+| RedirectController | ✅ | 301 permanent redirect |
+| Route configuration | ✅ | |
+| Error handling tests | ✅ | 404, inactive, expired |
 
 ### Step 7: Filament Panel
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| ShortUrlResource | ⬜ Pending | - | - |
-| Form with validation | ⬜ Pending | - | - |
-| Table with filters | ⬜ Pending | - | - |
-| Copy action | ⬜ Pending | - | - |
-| Filament tests | ⬜ Pending | - | - |
-| Translations | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| ShortUrlResource | ✅ | |
+| Form with validation | ✅ | |
+| Table with filters | ✅ | Status filter, trashed filter |
+| Copy action | ✅ | |
+| Filament tests | ✅ | |
+| Translations | ✅ | ES/EN |
 
 ### Step 8: Internationalization
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| Spanish language files | ⬜ Pending | - | - |
-| English language files | ⬜ Pending | - | - |
-| Apply to Filament | ⬜ Pending | - | - |
-| Error messages | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| Spanish language files | ✅ | Default locale |
+| English language files | ✅ | Fallback locale |
+| Apply to Filament | ✅ | |
+| Error messages | ✅ | |
 
 ### Step 9: Documentation
-| Task | Status | Date | Notes |
-|------|--------|------|-------|
-| Update PROGRESS.md | ⬜ Pending | - | - |
-| Write ARCHITECTURE.md | ⬜ Pending | - | - |
-| Prepare CHANGELOG.md | ⬜ Pending | - | - |
+| Task | Status | Notes |
+|------|--------|-------|
+| PROGRESS.md | ✅ | Updated 2026-03-11 |
+| ARCHITECTURE.md | ✅ | ADR-001 through ADR-010 |
+| CHANGELOG.md | ✅ | |
 
 ---
 
-## Legend
+## Phase 2: API & QR Codes - IN PROGRESS
 
-| Symbol | Meaning |
-|--------|---------|
-| ⬜ | Pending |
-| 🔄 | In Progress |
-| ✅ | Completed |
-| ⏸️ | Paused |
-| ❌ | Blocked |
+| Task | Status | Notes |
+|------|--------|-------|
+| REST API with Sanctum | ✅ | POST, PUT, DELETE /api/urls |
+| API token management | ✅ | artisan api:token:create |
+| Rate limiting | ✅ | 60 req/min per user |
+| QR Code generation (PNG) | ✅ | chillerlan/php-qrcode, on-demand |
+| QR Code generation (SVG) | ✅ | Download from table + edit page |
+| Usage analytics | ⬜ | |
+
+---
+
+## Phase 3: Advanced Features - PENDING
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Custom slugs/codes | ⬜ | |
+| Link expiration automation | ⬜ | Field exists, auto-expire pending |
+| Click tracking with geolocation | ⬜ | |
+| Bulk URL shortening | ⬜ | |
 
 ---
 
@@ -108,16 +120,9 @@
 
 | Metric | Target | Current |
 |--------|--------|---------|
-| Test Coverage | ≥80% | - |
-| PHPStan Level | 9 | - |
-| Pint | Pass | - |
-| PHPCS | Pass | - |
-
----
-
-## Session Notes
-
-### Session 1 - [Date Pending]
-_Notes will be added as development progresses_
+| Test Coverage | ≥80% | 220 tests, 462 assertions |
+| PHPStan Level | 9 | 9 (0 errors) |
+| Pint | Pass | Pass |
+| PHPCS | Pass | Pass |
 
 ---
