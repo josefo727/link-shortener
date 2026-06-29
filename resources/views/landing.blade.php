@@ -37,21 +37,41 @@
             </p>
         </header>
 
-        <div class="grid md:grid-cols-2 gap-8 mb-16">
+        <div class="grid md:grid-cols-3 gap-6 mb-16">
             <!-- Tecnología y Desarrollo Web -->
             <a href="https://jose-gutierrez.com/" target="_blank" rel="noopener noreferrer"
-               class="group block bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:border-blue-500/50 hover:bg-slate-800/80 transition-all duration-300">
+               class="group block bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6 hover:border-blue-500/50 hover:bg-slate-800/80 transition-all duration-300">
                 <div class="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/30 transition-colors">
                     <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-semibold text-white mb-3">Tecnología y Desarrollo Web</h2>
-                <p class="text-slate-400 mb-4">
+                <h2 class="text-xl font-semibold text-white mb-3">Tecnología y Desarrollo Web</h2>
+                <p class="text-slate-400 mb-4 text-sm">
                     Artículos, tutoriales y recursos sobre desarrollo web, programación y las últimas tecnologías.
                 </p>
-                <span class="inline-flex items-center text-blue-400 font-medium group-hover:text-blue-300">
+                <span class="inline-flex items-center text-blue-400 text-sm font-medium group-hover:text-blue-300">
                     Visitar jose-gutierrez.com
+                    <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </span>
+            </a>
+
+            <!-- Monitoreo Sísmico de Venezuela -->
+            <a href="/sismos-vzla/"
+               class="group block bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6 hover:border-orange-500/50 hover:bg-slate-800/80 transition-all duration-300">
+                <div class="w-14 h-14 bg-orange-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-orange-500/30 transition-colors">
+                    <svg class="w-7 h-7 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-white mb-3">Monitoreo Sísmico</h2>
+                <p class="text-slate-400 mb-4 text-sm">
+                    Dashboard interactivo de sismos en Venezuela en tiempo real, histórico desde 2000 y prevención.
+                </p>
+                <span class="inline-flex items-center text-orange-400 text-sm font-medium group-hover:text-orange-300">
+                    Abrir Dashboard
                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
@@ -60,17 +80,17 @@
 
             <!-- Apologética Cristiana -->
             <a href="https://bajolalupa.net/" target="_blank" rel="noopener noreferrer"
-               class="group block bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:border-emerald-500/50 hover:bg-slate-800/80 transition-all duration-300">
+               class="group block bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6 hover:border-emerald-500/50 hover:bg-slate-800/80 transition-all duration-300">
                 <div class="w-14 h-14 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-emerald-500/30 transition-colors">
                     <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-semibold text-white mb-3">Apologética Cristiana</h2>
-                <p class="text-slate-400 mb-4">
+                <h2 class="text-xl font-semibold text-white mb-3">Apologética Cristiana</h2>
+                <p class="text-slate-400 mb-4 text-sm">
                     Reflexiones, estudios y análisis desde una perspectiva cristiana. Fe y razón en armonía.
                 </p>
-                <span class="inline-flex items-center text-emerald-400 font-medium group-hover:text-emerald-300">
+                <span class="inline-flex items-center text-emerald-400 text-sm font-medium group-hover:text-emerald-300">
                     Visitar bajolalupa.net
                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>

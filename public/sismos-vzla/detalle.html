@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="José Rafael Gutierrez - josefo727@gmail.com">
+    <meta name="description" content="Detalles del sismo seleccionado en el Monitoreo Sísmico de Venezuela. Desarrollado por José Rafael Gutierrez.">
+    <title>Detalles del Evento Sísmico - Monitoreo Sísmico</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="logo-container">
+            <svg class="logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span class="app-title">SISMOS VENEZUELA</span>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html" class="btn-nav">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                <span>Dashboard</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="detail-container">
+        <!-- Error Banner -->
+        <div id="error-banner" class="error-banner" style="display: none;">
+            <strong>Error:</strong> No se pudo cargar la información del sismo. El ID del evento puede no ser válido o la API no está respondiendo.
+        </div>
+
+        <div id="loading-spinner" class="loading-overlay" style="position: fixed; background: rgba(11, 15, 25, 0.95);">
+            <div class="loading-spinner"></div>
+            <p style="color: var(--text-secondary); font-weight: 500;">Obteniendo información del sismo...</p>
+        </div>
+
+        <!-- Detail Card -->
+        <article id="detail-card" class="detail-card" style="display: none;">
+            <header class="detail-header">
+                <div id="detail-mag" class="detail-mag-badge">0.0</div>
+                <h1 id="detail-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Cargando ubicación...</h1>
+                <p id="detail-time" style="color: var(--text-secondary); font-size: 0.9rem;">Cargando hora...</p>
+            </header>
+
+            <!-- Map area -->
+            <div class="detail-map">
+                <div id="map" style="width: 100%; height: 100%;"></div>
+            </div>
+
+            <!-- Parameters Grid -->
+            <div class="detail-body">
+                <h2 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--accent-orange);">Parámetros Sismológicos</h2>
+                <div class="detail-grid">
+                    <div class="detail-field">
+                        <div class="label">Magnitud</div>
+                        <div id="val-mag" class="value">-</div>
+                    </div>
+                    <div class="detail-field">
+                        <div class="label">Profundidad</div>
+                        <div id="val-depth" class="value">-</div>
+                    </div>
+                    <div class="detail-field">
+                        <div class="label">Latitud</div>
+                        <div id="val-lat" class="value">-</div>
+                    </div>
+                    <div class="detail-field">
+                        <div class="label">Longitud</div>
+                        <div id="val-lon" class="value">-</div>
+                    </div>
+                    <div class="detail-field">
+                        <div class="label">Reportes de Sentido (DYFI)</div>
+                        <div id="val-dyfi" class="value">-</div>
+                    </div>
+                    <div class="detail-field">
+                        <div class="label">Significancia del Evento</div>
+                        <div id="val-sig" class="value">-</div>
+                    </div>
+                    <div class="detail-field">
+                        <div class="label">Brecha Sismológica (Gap)</div>
+                        <div id="val-gap" class="value">-</div>
+                    </div>
+                    <div class="detail-field">
+                        <div class="label">Red de Registro</div>
+                        <div id="val-net" class="value">-</div>
+                    </div>
+                </div>
+
+                <div class="detail-footer">
+                    <button onclick="window.history.back();" class="btn-secondary">Atrás</button>
+                    <a id="btn-usgs-link" href="#" target="_blank" class="btn-primary">Ver en Sitio Oficial de la USGS</a>
+                </div>
+            </div>
+        </article>
+
+        <!-- Footer -->
+        <footer style="margin-top: 3rem; padding: 2rem 0 1rem; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">
+            <p>&copy; 2026 Sismos Venezuela. Desarrollado por <strong>José Rafael Gutierrez</strong>.</p>
+            <p style="margin-top: 0.5rem;">Contacto para desarrollos: <a href="mailto:josefo727@gmail.com" style="color: var(--accent-orange); text-decoration: none; font-weight: 600;">josefo727@gmail.com</a></p>
+        </footer>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Detail script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('id');
+
+            if (!eventId) {
+                showError("No se especificó un ID de evento válido.");
+                return;
+            }
+
+            fetchEventDetails(eventId);
+        });
+
+        async function fetchEventDetails(id) {
+            const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?eventid=${id}&format=geojson`;
+            const spinner = document.getElementById('loading-spinner');
+            const card = document.getElementById('detail-card');
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to load event details');
+                const data = await response.json();
+                
+                spinner.style.display = 'none';
+                card.style.display = 'block';
+                
+                renderDetails(data);
+            } catch (err) {
+                console.error("Error retrieving event details: ", err);
+                spinner.style.display = 'none';
+                showError("Error de comunicación con la USGS o el sismo no existe.");
+            }
+        }
+
+        function showError(msg) {
+            const banner = document.getElementById('error-banner');
+            banner.innerHTML = `<strong>Error:</strong> ${msg}`;
+            banner.style.display = 'block';
+        }
+
+        function getMagnitudeClass(mag) {
+            if (mag < 5.0) return 'level-minor';
+            if (mag < 6.0) return 'level-moderate';
+            return 'level-strong';
+        }
+
+        function renderDetails(data) {
+            const prop = data.properties;
+            const geom = data.geometry;
+            const coords = geom.coordinates;
+            
+            const mag = prop.mag;
+            const depth = coords[2];
+            const lat = coords[1];
+            const lon = coords[0];
+            const time = new Date(prop.time);
+
+            // Populate header
+            const magBadge = document.getElementById('detail-mag');
+            magBadge.textContent = mag.toFixed(1);
+            magBadge.className = `detail-mag-badge ${getMagnitudeClass(mag)}`;
+
+            document.getElementById('detail-title').textContent = prop.place;
+            
+            const dateStr = time.toLocaleDateString('es-VE', { timeZone: 'America/Caracas', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = time.toLocaleTimeString('es-VE', { timeZone: 'America/Caracas', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('detail-time').textContent = `${dateStr} a las ${timeStr} (Hora de Venezuela)`;
+
+            // Populate parameters grid
+            document.getElementById('val-mag').textContent = `${mag.toFixed(1)} Mw (${getMagLabel(mag)})`;
+            document.getElementById('val-depth').textContent = `${depth.toFixed(1)} km`;
+            document.getElementById('val-lat').textContent = `${lat.toFixed(4)}° N`;
+            document.getElementById('val-lon').textContent = `${lon.toFixed(4)}° O`;
+            document.getElementById('val-dyfi').textContent = prop.dyfi !== null ? prop.dyfi : '0 (Sin reportes de usuarios)';
+            document.getElementById('val-sig').textContent = `${prop.sig} / 1000`;
+            document.getElementById('val-gap').textContent = prop.gap !== null ? `${prop.gap}°` : 'No disponible';
+            document.getElementById('val-net').textContent = prop.net.toUpperCase();
+
+            // Link to official website
+            document.getElementById('btn-usgs-link').href = prop.url;
+
+            // Render Map
+            setTimeout(() => {
+                const map = L.map('map', {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([lat, lon], 9);
+
+                // Dark mode tiles
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 20
+                }).addTo(map);
+
+                // Add zoom control manually
+                L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+                const color = mag < 5.0 ? 'var(--accent-green)' : (mag < 6.0 ? '#f59e0b' : 'var(--accent-red)');
+                
+                // Pulsing epicenter
+                L.circle([lat, lon], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.6,
+                    weight: 2,
+                    radius: Math.pow(mag, 2) * 500
+                }).addTo(map);
+
+                // Outer animated ring
+                L.circle([lat, lon], {
+                    color: color,
+                    fillColor: 'transparent',
+                    weight: 1,
+                    dashArray: '5, 5',
+                    radius: Math.pow(mag, 2.2) * 1200
+                }).addTo(map);
+            }, 100);
+        }
+
+        function getMagLabel(mag) {
+            if (mag < 4.0) return 'Menor';
+            if (mag < 5.0) return 'Ligero';
+            if (mag < 6.0) return 'Moderado';
+            if (mag < 7.0) return 'Fuerte';
+            return 'Mayor / Terremoto';
+        }
+    </script>
+</body>
+</html>

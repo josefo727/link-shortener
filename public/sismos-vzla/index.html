@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="José Rafael Gutierrez - josefo727@gmail.com">
+    <meta name="description" content="Dashboard interactivo de sismología en Venezuela. Desarrollado por José Rafael Gutierrez.">
+    <title>Monitoreo Sísmico de Venezuela - Dashboard</title>
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="logo-container">
+            <svg class="logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span class="app-title">SISMOS VENEZUELA</span>
+        </div>
+        <nav class="nav-links">
+            <a href="info.html" class="btn-nav">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                <span>Fallas y Prevención</span>
+            </a>
+            <a href="/" class="btn-nav">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span>Volver al Acortador</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Error Banner -->
+        <div id="error-banner" class="error-banner">
+            <strong>Error de conexión:</strong> No se pudieron cargar los datos desde la API de la USGS. Revisa tu conexión a internet o intenta de nuevo más tarde.
+        </div>
+
+        <!-- Filters Panel -->
+        <section class="panel-filters">
+            <h2>Filtros de Búsqueda Sismológica</h2>
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="filter-year">Año de consulta</label>
+                    <select id="filter-year" class="form-control">
+                        <!-- Will be populated dynamically via JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-min-mag">Magnitud Mínima</label>
+                    <select id="filter-min-mag" class="form-control">
+                        <option value="3.0">M ≥ 3.0 (Todos los detectables)</option>
+                        <option value="4.0" selected>M ≥ 4.0 (Sentidos localmente)</option>
+                        <option value="5.0">M ≥ 5.0 (Moderados)</option>
+                        <option value="6.0">M ≥ 6.0 (Fuertes)</option>
+                        <option value="7.0">M ≥ 7.0 (Terremotos Mayores)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filter-sort">Ordenar por</label>
+                    <select id="filter-sort" class="form-control">
+                        <option value="time-desc">Más recientes primero</option>
+                        <option value="mag-desc">Mayor magnitud primero</option>
+                        <option value="depth-asc">Más superficiales primero</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Summary -->
+        <section class="stats-summary">
+            <div class="stat-card">
+                <div class="label">Sismos Registrados</div>
+                <div id="stat-total" class="value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Magnitud Máxima</div>
+                <div id="stat-max-mag" class="value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Profundidad Promedio</div>
+                <div id="stat-avg-depth" class="value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Eventos M ≥ 6.0</div>
+                <div id="stat-strong-count" class="value">-</div>
+            </div>
+        </section>
+
+        <!-- Map & List Section -->
+        <section class="map-list-section">
+            <!-- Map Card -->
+            <div class="map-container">
+                <!-- Loading Overlay -->
+                <div id="loading-overlay" class="loading-overlay">
+                    <div class="loading-spinner"></div>
+                    <p style="color: var(--text-secondary); font-weight: 500;">Consultando API de la USGS...</p>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <!-- Sidebar List -->
+            <div class="list-container">
+                <div class="list-header">
+                    <span class="list-title">Historial de Eventos</span>
+                    <span id="list-count" class="list-count">0</span>
+                </div>
+                <div id="list-items" class="list-items">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="chart-card">
+                <h3 class="chart-title">Distribución de Sismos por Mes</h3>
+                <div class="chart-container">
+                    <canvas id="chart-monthly"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Distribución por Rangos de Magnitud</h3>
+                <div class="chart-container">
+                    <canvas id="chart-magnitude"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer style="margin-top: 3rem; padding: 2rem 0 1rem; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; grid-column: 1 / -1;">
+            <p>&copy; 2026 Sismos Venezuela. Desarrollado por <strong>José Rafael Gutierrez</strong>.</p>
+            <p style="margin-top: 0.5rem;">Contacto para desarrollos: <a href="mailto:josefo727@gmail.com" style="color: var(--accent-orange); text-decoration: none; font-weight: 600;">josefo727@gmail.com</a></p>
+        </footer>
+    </div>
+
+    <!-- Leaflet JS for Map -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Main Logic -->
+    <script>
+        // Global variables
+        let map;
+        let sismoMarkers = [];
+        let fetchedEvents = [];
+        let chartMonthly;
+        let chartMagnitude;
+        
+        // Settings
+        const minLat = 0.0;
+        const maxLat = 13.0;
+        const minLon = -73.5;
+        const maxLon = -59.0;
+        
+        // Element references
+        const filterYear = document.getElementById('filter-year');
+        const filterMinMag = document.getElementById('filter-min-mag');
+        const filterSort = document.getElementById('filter-sort');
+        const statTotal = document.getElementById('stat-total');
+        const statMaxMag = document.getElementById('stat-max-mag');
+        const statAvgDepth = document.getElementById('stat-avg-depth');
+        const statStrongCount = document.getElementById('stat-strong-count');
+        const listItems = document.getElementById('list-items');
+        const listCountLabel = document.getElementById('list-count');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const errorBanner = document.getElementById('error-banner');
+
+        // Document Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            initYearDropdown();
+            initMap();
+            initCharts();
+            
+            // Listeners
+            filterYear.addEventListener('change', () => loadData(false));
+            filterMinMag.addEventListener('change', () => loadData(false));
+            filterSort.addEventListener('change', () => processAndRender(false));
+            
+            // Initial load
+            loadData(false);
+
+            // Real-time polling: Check for new sismos every 60 seconds
+            setInterval(() => {
+                loadData(true);
+            }, 60000);
+        });
+
+        function initYearDropdown() {
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear; y >= 2000; y--) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                if (y === currentYear) opt.selected = true;
+                filterYear.appendChild(opt);
+            }
+        }
+
+        function initMap() {
+            // Center in Venezuela
+            map = L.map('map', {
+                zoomControl: true,
+                maxBounds: [[-2, -80], [17, -50]]
+            }).setView([7.5, -66.0], 6);
+
+            // Dark Mode Tile Layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+        }
+
+        function initCharts() {
+            // Monthly Chart
+            const ctxMonthly = document.getElementById('chart-monthly').getContext('2d');
+            chartMonthly = new Chart(ctxMonthly, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    datasets: [{
+                        label: 'Número de sismos',
+                        data: Array(12).fill(0),
+                        backgroundColor: '#f97316',
+                        borderColor: '#ea580c',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // Magnitude Chart
+            const ctxMagnitude = document.getElementById('chart-magnitude').getContext('2d');
+            chartMagnitude = new Chart(ctxMagnitude, {
+                type: 'doughnut',
+                data: {
+                    labels: ['M 3.0-3.9 (Menor)', 'M 4.0-4.9 (Ligero)', 'M 5.0-5.9 (Moderado)', 'M 6.0-6.9 (Fuerte)', 'M 7.0+ (Mayor)'],
+                    datasets: [{
+                        data: Array(5).fill(0),
+                        backgroundColor: [
+                            '#10b981', // green
+                            '#84cc16', // lime
+                            '#f59e0b', // orange-yellow
+                            '#f97316', // orange
+                            '#ef4444'  // red
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                padding: 15,
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadData(isBackground = false) {
+            const year = filterYear.value;
+            const minMag = filterMinMag.value;
+            
+            const starttime = `${year}-01-01`;
+            const endtime = `${year}-12-31T23:59:59`;
+            
+            const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?` + 
+                        `format=geojson&` +
+                        `starttime=${starttime}&` +
+                        `endtime=${endtime}&` +
+                        `minmagnitude=${minMag}&` +
+                        `minlatitude=${minLat}&` +
+                        `maxlatitude=${maxLat}&` +
+                        `minlongitude=${minLon}&` +
+                        `maxlongitude=${maxLon}`;
+
+            if (!isBackground) showLoading(true);
+            errorBanner.style.display = 'none';
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('API response not ok');
+                const data = await response.json();
+                
+                // Parse features and filter out Colombian events that are deep inside Colombia
+                const newEvents = (data.features || []).map(f => {
+                    const prop = f.properties;
+                    const coords = f.geometry.coordinates;
+                    return {
+                        id: f.id,
+                        mag: prop.mag,
+                        place: prop.place,
+                        time: new Date(prop.time),
+                        depth: coords[2],
+                        lat: coords[1],
+                        lon: coords[0]
+                    };
+                }).filter(e => {
+                    // Custom clean up: if place contains "Colombia", only include it if it's border (lon > -72.0)
+                    if (e.place.includes("Colombia") && e.lon < -72.0) {
+                        return false;
+                    }
+                    return true;
+                });
+
+                // If background fetch, check if there's any actual changes before triggering updates
+                if (isBackground) {
+                    const currentIds = fetchedEvents.map(e => e.id).join(',');
+                    const newIds = newEvents.map(e => e.id).join(',');
+                    if (currentIds === newIds) {
+                        return; // No changes, keep everything as is
+                    }
+                }
+                
+                fetchedEvents = newEvents;
+                processAndRender(isBackground);
+            } catch (err) {
+                console.error("Error retrieving earthquake data: ", err);
+                if (!isBackground) {
+                    errorBanner.style.display = 'block';
+                    showLoading(false);
+                }
+            }
+        }
+
+        function processAndRender(isBackground = false) {
+            if (!isBackground) showLoading(true);
+            
+            // Sort data
+            const sortVal = filterSort.value;
+            if (sortVal === 'time-desc') {
+                fetchedEvents.sort((a, b) => b.time - a.time);
+            } else if (sortVal === 'mag-desc') {
+                fetchedEvents.sort((a, b) => b.mag - a.mag);
+            } else if (sortVal === 'depth-asc') {
+                fetchedEvents.sort((a, b) => a.depth - b.depth);
+            }
+            
+            // Update stats
+            updateStats();
+            
+            // Update map markers
+            clearMapMarkers();
+            renderMapMarkers();
+            
+            // Update sidebar list
+            renderList();
+            
+            // Update charts
+            updateChartsData();
+            
+            if (!isBackground) showLoading(false);
+        }
+
+        function updateStats() {
+            const count = fetchedEvents.length;
+            statTotal.textContent = count;
+            
+            if (count === 0) {
+                statMaxMag.textContent = "-";
+                statAvgDepth.textContent = "-";
+                statStrongCount.textContent = "0";
+                return;
+            }
+            
+            let maxMag = 0;
+            let sumDepth = 0;
+            let strongCount = 0;
+            
+            fetchedEvents.forEach(e => {
+                if (e.mag > maxMag) maxMag = e.mag;
+                sumDepth += e.depth;
+                if (e.mag >= 6.0) strongCount++;
+            });
+            
+            statMaxMag.textContent = maxMag.toFixed(1);
+            statAvgDepth.textContent = `${(sumDepth / count).toFixed(0)} km`;
+            statStrongCount.textContent = strongCount;
+            
+            // Highlight strong count card if any
+            const strongCard = statStrongCount.parentElement;
+            if (strongCount > 0) {
+                strongCard.style.borderColor = 'var(--accent-red)';
+                statStrongCount.style.color = 'var(--accent-red)';
+            } else {
+                strongCard.style.borderColor = 'var(--border-color)';
+                statStrongCount.style.color = 'var(--accent-orange)';
+            }
+        }
+
+        function clearMapMarkers() {
+            sismoMarkers.forEach(m => map.removeLayer(m));
+            sismoMarkers = [];
+        }
+
+        function getMarkerColor(mag) {
+            if (mag < 5.0) return 'var(--accent-green)';
+            if (mag < 6.0) return '#f59e0b';
+            return 'var(--accent-red)';
+        }
+
+        function renderMapMarkers() {
+            fetchedEvents.forEach(e => {
+                const color = getMarkerColor(e.mag);
+                const radius = Math.pow(e.mag, 1.8) * 1200; // Scaled radius
+                
+                const circle = L.circle([e.lat, e.lon], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.5,
+                    weight: 1.5,
+                    radius: radius
+                });
+                
+                // Construct Popup
+                const dateStr = e.time.toLocaleDateString('es-VE', { timeZone: 'America/Caracas' });
+                const timeStr = e.time.toLocaleTimeString('es-VE', { timeZone: 'America/Caracas' });
+                
+                const popupContent = `
+                    <div class="popup-content">
+                        <div class="popup-title">M ${e.mag.toFixed(1)} - ${e.place}</div>
+                        <div class="popup-details">
+                            <span><strong>Fecha:</strong> ${dateStr}</span>
+                            <span><strong>Hora local:</strong> ${timeStr}</span>
+                            <span><strong>Profundidad:</strong> ${e.depth.toFixed(1)} km</span>
+                            <span><strong>Coordenadas:</strong> ${e.lat.toFixed(3)}°, ${e.lon.toFixed(3)}°</span>
+                        </div>
+                        <a href="detalle.html?id=${e.id}" class="popup-link">Ver detalles completos</a>
+                    </div>
+                `;
+                
+                circle.bindPopup(popupContent);
+                circle.addTo(map);
+                sismoMarkers.push(circle);
+                
+                // Save reference of the circle in the event object to trigger click programmatically
+                e.marker = circle;
+            });
+        }
+
+        function renderList() {
+            listItems.innerHTML = '';
+            listCountLabel.textContent = fetchedEvents.length;
+            
+            if (fetchedEvents.length === 0) {
+                listItems.innerHTML = `
+                    <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No se registraron sismos con los filtros seleccionados en este año.
+                    </div>
+                `;
+                return;
+            }
+            
+            fetchedEvents.forEach(e => {
+                const item = document.createElement('div');
+                item.className = 'sismo-item';
+                item.dataset.id = e.id;
+                
+                let levelClass = 'level-minor';
+                if (e.mag >= 5.0 && e.mag < 6.0) levelClass = 'level-moderate';
+                if (e.mag >= 6.0) levelClass = 'level-strong';
+                
+                const dateStr = e.time.toLocaleDateString('es-VE', { timeZone: 'America/Caracas', month: 'short', day: 'numeric' });
+                const timeStr = e.time.toLocaleTimeString('es-VE', { timeZone: 'America/Caracas', hour: '2-digit', minute: '2-digit' });
+                
+                item.innerHTML = `
+                    <div class="sismo-badge ${levelClass}">
+                        ${e.mag.toFixed(1)}
+                    </div>
+                    <div class="sismo-info">
+                        <div class="sismo-place" title="${e.place}">${e.place}</div>
+                        <div class="sismo-meta">
+                            <span>${dateStr} - ${timeStr}</span>
+                            <span>${e.depth.toFixed(0)} km</span>
+                        </div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    // Clear previous selection
+                    document.querySelectorAll('.sismo-item').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                    
+                    // Center map on marker and open popup
+                    map.setView([e.lat, e.lon], 8);
+                    e.marker.openPopup();
+                });
+                
+                listItems.appendChild(item);
+            });
+        }
+
+        function updateChartsData() {
+            // 1. Monthly Chart Data
+            const monthlyCounts = Array(12).fill(0);
+            fetchedEvents.forEach(e => {
+                const m = e.time.getMonth();
+                monthlyCounts[m]++;
+            });
+            chartMonthly.data.datasets[0].data = monthlyCounts;
+            chartMonthly.update();
+
+            // 2. Magnitude Distribution Chart Data
+            const magCounts = Array(5).fill(0);
+            fetchedEvents.forEach(e => {
+                if (e.mag < 4.0) magCounts[0]++;
+                else if (e.mag < 5.0) magCounts[1]++;
+                else if (e.mag < 6.0) magCounts[2]++;
+                else if (e.mag < 7.0) magCounts[3]++;
+                else magCounts[4]++;
+            });
+            chartMagnitude.data.datasets[0].data = magCounts;
+            chartMagnitude.update();
+        }
+
+        function showLoading(show) {
+            loadingOverlay.style.opacity = show ? '1' : '0';
+            loadingOverlay.style.pointerEvents = show ? 'auto' : 'none';
+        }
+    </script>
+</body>
+</html>
