@@ -2,6 +2,11 @@ FROM webdevops/php-nginx:8.4-alpine
 
 ENV WEB_DOCUMENT_ROOT=/app/public
 
+# Allow static index.html as a directory index (e.g. /sismos-vzla/).
+# Without this, webdevops defaults to index.php only and bare-directory
+# requests for static HTML return 403.
+ENV WEB_DOCUMENT_INDEX="index.php index.html"
+
 ENV PHP_DISMOD=bz2,calendar,exiif,ffi,gettext,ldap,mysqli,imap,pdo_pgsql,pgsql,soap,sockets,sysvmsg,sysvsm,sysvshm,shmop,xsl,apcu,vips,yaml,mongodb,amqp
 
 WORKDIR /app
