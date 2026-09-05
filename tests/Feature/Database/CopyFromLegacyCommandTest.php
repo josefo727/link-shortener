@@ -118,3 +118,57 @@ it('never uses Eloquent, so no cache entry appears as a side effect of the copy'
 
     expect(Cache::has('shorturl:code:abc123'))->toBeFalse();
 });
+
+it('refuses to run when the target already holds rows, and writes nothing', function (): void {
+    DB::table('short_urls')->insert([
+        'code' => 'existing',
+        'title' => 'Existing',
+        'original_url' => 'https://existing.example.com',
+        'original_url_hash' => hash('sha256', 'https://existing.example.com'),
+        'status' => 'active',
+        'clicks' => 0,
+        'created_at' => '2026-01-01 00:00:00',
+        'updated_at' => '2026-01-01 00:00:00',
+    ]);
+    seedLegacyFixture();
+
+    $exitCode = Artisan::call('db:copy-from-legacy');
+
+    expect($exitCode)->toBe(1)
+        ->and(Artisan::output())->toContain('short_urls')
+        ->and(DB::table('short_urls')->count())->toBe(1)
+        ->and(DB::table('users')->count())->toBe(0)
+        ->and(DB::table('personal_access_tokens')->count())->toBe(0);
+});
+
+it('replaces the target data cleanly with --truncate', function (): void {
+    DB::table('short_urls')->insert([
+        'code' => 'stale',
+        'title' => 'Stale',
+        'original_url' => 'https://stale.example.com',
+        'original_url_hash' => hash('sha256', 'https://stale.example.com'),
+        'status' => 'active',
+        'clicks' => 0,
+        'created_at' => '2026-01-01 00:00:00',
+        'updated_at' => '2026-01-01 00:00:00',
+    ]);
+    seedLegacyFixture();
+
+    $exitCode = Artisan::call('db:copy-from-legacy', ['--truncate' => true]);
+
+    expect($exitCode)->toBe(0)
+        ->and(DB::table('short_urls')->count())->toBe(1)
+        ->and(DB::table('short_urls')->first()->code)->toBe('abc123');
+});
+
+it('stays clean when run with --truncate a second time in a row', function (): void {
+    seedLegacyFixture();
+
+    Artisan::call('db:copy-from-legacy', ['--truncate' => true]);
+    $secondRunExitCode = Artisan::call('db:copy-from-legacy', ['--truncate' => true]);
+
+    expect($secondRunExitCode)->toBe(0)
+        ->and(DB::table('users')->count())->toBe(1)
+        ->and(DB::table('short_urls')->count())->toBe(1)
+        ->and(DB::table('personal_access_tokens')->count())->toBe(1);
+});
