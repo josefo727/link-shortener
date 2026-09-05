@@ -6,72 +6,14 @@ use App\Database\LegacyMigration\TableManifest;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-
-/**
- * Points the 'legacy' connection at a fresh in-memory SQLite database, migrated with this app's
- * own schema. Per ADR 0004, this feature's own suite never opens a connection to the real
- * legacy MySQL source.
- */
-function useLegacySqliteConnection(): void
-{
-    config(['database.connections.legacy' => [
-        'driver' => 'sqlite',
-        'database' => ':memory:',
-        'prefix' => '',
-        'foreign_key_constraints' => false,
-    ]]);
-    DB::purge('legacy');
-
-    Artisan::call('migrate', ['--database' => 'legacy', '--force' => true]);
-}
-
-function seedLegacyFixture(): void
-{
-    DB::connection('legacy')->table('users')->insert([
-        'id' => 1,
-        'name' => 'Legacy Owner',
-        'email' => 'owner@example.com',
-        'email_verified_at' => '2026-01-01 00:00:00',
-        'password' => 'hashed-password',
-        'remember_token' => null,
-        'created_at' => '2026-01-01 00:00:00',
-        'updated_at' => '2026-01-02 00:00:00',
-    ]);
-
-    DB::connection('legacy')->table('short_urls')->insert([
-        'id' => 1,
-        'code' => 'abc123',
-        'title' => 'Example',
-        'original_url' => 'https://example.com/some/path',
-        'original_url_hash' => hash('sha256', 'https://example.com/some/path'),
-        'status' => 'active',
-        'clicks' => 42,
-        'expires_at' => null,
-        'created_at' => '2026-02-01 08:30:00',
-        'updated_at' => '2026-02-03 09:15:00',
-        'deleted_at' => null,
-    ]);
-
-    DB::connection('legacy')->table('personal_access_tokens')->insert([
-        'id' => 1,
-        'tokenable_type' => 'App\\Models\\User',
-        'tokenable_id' => 1,
-        'name' => 'cli',
-        'token' => hash('sha256', 'a-token'),
-        'abilities' => '["*"]',
-        'last_used_at' => null,
-        'expires_at' => null,
-        'created_at' => '2026-01-05 00:00:00',
-        'updated_at' => '2026-01-05 00:00:00',
-    ]);
-}
+use Tests\Support\LegacyFixture;
 
 beforeEach(function (): void {
-    useLegacySqliteConnection();
+    LegacyFixture::useSqliteConnection();
 });
 
 it('copies every business table field for field, including exact timestamps', function (): void {
-    seedLegacyFixture();
+    LegacyFixture::seed();
 
     $this->artisan('db:copy-from-legacy')->assertExitCode(0);
 
@@ -97,7 +39,7 @@ it('copies every business table field for field, including exact timestamps', fu
 });
 
 it('touches only the manifest tables', function (): void {
-    seedLegacyFixture();
+    LegacyFixture::seed();
 
     $this->artisan('db:copy-from-legacy')->assertExitCode(0);
 
@@ -112,7 +54,7 @@ it('touches only the manifest tables', function (): void {
 
 it('never uses Eloquent, so no cache entry appears as a side effect of the copy', function (): void {
     Cache::flush();
-    seedLegacyFixture();
+    LegacyFixture::seed();
 
     $this->artisan('db:copy-from-legacy')->assertExitCode(0);
 
@@ -130,7 +72,7 @@ it('refuses to run when the target already holds rows, and writes nothing', func
         'created_at' => '2026-01-01 00:00:00',
         'updated_at' => '2026-01-01 00:00:00',
     ]);
-    seedLegacyFixture();
+    LegacyFixture::seed();
 
     $exitCode = Artisan::call('db:copy-from-legacy');
 
@@ -152,7 +94,7 @@ it('replaces the target data cleanly with --truncate', function (): void {
         'created_at' => '2026-01-01 00:00:00',
         'updated_at' => '2026-01-01 00:00:00',
     ]);
-    seedLegacyFixture();
+    LegacyFixture::seed();
 
     $exitCode = Artisan::call('db:copy-from-legacy', ['--truncate' => true]);
 
@@ -162,7 +104,7 @@ it('replaces the target data cleanly with --truncate', function (): void {
 });
 
 it('stays clean when run with --truncate a second time in a row', function (): void {
-    seedLegacyFixture();
+    LegacyFixture::seed();
 
     Artisan::call('db:copy-from-legacy', ['--truncate' => true]);
     $secondRunExitCode = Artisan::call('db:copy-from-legacy', ['--truncate' => true]);
@@ -174,7 +116,7 @@ it('stays clean when run with --truncate a second time in a row', function (): v
 });
 
 it('resets PostgreSQL identity sequences so a new row never collides with a copied id', function (): void {
-    seedLegacyFixture();
+    LegacyFixture::seed();
     Artisan::call('db:copy-from-legacy');
 
     $maxCopiedShortUrlId = (int) DB::table('short_urls')->max('id');
