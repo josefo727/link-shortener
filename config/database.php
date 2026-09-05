@@ -115,6 +115,24 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        // Read-only source for the one-time data migration (Feature 002). Never the default
+        // connection -- reached explicitly via DB::connection('legacy'). See
+        // .specs/002-data-migration/contracts/legacy-database.md.
+        'legacy' => [
+            'driver' => 'mysql',
+            'host' => env('LEGACY_DB_HOST', '127.0.0.1'),
+            'port' => env('LEGACY_DB_PORT', '3306'),
+            'database' => env('LEGACY_DB_DATABASE', 'laravel'),
+            'username' => env('LEGACY_DB_USERNAME', 'root'),
+            'password' => env('LEGACY_DB_PASSWORD', ''),
+            'charset' => env('LEGACY_DB_CHARSET', 'utf8mb4'),
+            'collation' => env('LEGACY_DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
     ],
 
     /*
