@@ -202,12 +202,13 @@ F: skipped — no smell detected yet, revisit after T007.
 files:
   - app/Console/Commands/VerifyLegacyCopyCommand.php
   - tests/Feature/Database/VerifyLegacyCopyCommandTest.php
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
-notes:
+  red: 2934f8b
+  green: 79472e5
+  refactor: ca3ccd1 — fixed a PHPStan level 9 cast error in normalize()
+notes: Verified green against both SQLite-vs-SQLite and SQLite-legacy-vs-real-PostgreSQL —
+  confirms the value-normalization step actually matters, not just defensive code.
 ```
 
 ---
