@@ -172,3 +172,47 @@ it('stays clean when run with --truncate a second time in a row', function (): v
         ->and(DB::table('short_urls')->count())->toBe(1)
         ->and(DB::table('personal_access_tokens')->count())->toBe(1);
 });
+
+it('resets PostgreSQL identity sequences so a new row never collides with a copied id', function (): void {
+    seedLegacyFixture();
+    Artisan::call('db:copy-from-legacy');
+
+    $maxCopiedShortUrlId = (int) DB::table('short_urls')->max('id');
+    $maxCopiedUserId = (int) DB::table('users')->max('id');
+    $maxCopiedTokenId = (int) DB::table('personal_access_tokens')->max('id');
+
+    $newUserId = DB::table('users')->insertGetId([
+        'name' => 'New User',
+        'email' => 'new-user@example.com',
+        'password' => 'x',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $newShortUrlId = DB::table('short_urls')->insertGetId([
+        'code' => 'newcode',
+        'title' => 'New',
+        'original_url' => 'https://new.example.com',
+        'original_url_hash' => hash('sha256', 'https://new.example.com'),
+        'status' => 'active',
+        'clicks' => 0,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $newTokenId = DB::table('personal_access_tokens')->insertGetId([
+        'tokenable_type' => 'App\\Models\\User',
+        'tokenable_id' => $newUserId,
+        'name' => 'new-token',
+        'token' => hash('sha256', 'new-token'),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    expect($newUserId)->toBeGreaterThan($maxCopiedUserId)
+        ->and($newShortUrlId)->toBeGreaterThan($maxCopiedShortUrlId)
+        ->and($newTokenId)->toBeGreaterThan($maxCopiedTokenId);
+})->skip(
+    fn (): bool => DB::connection()->getDriverName() !== 'pgsql',
+    'sequence reset is PostgreSQL-specific -- meaningless against SQLite (ADR 0004)',
+);
