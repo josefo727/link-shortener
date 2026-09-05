@@ -136,12 +136,14 @@ F: extract the driver check into a small private guard method if the duplication
 files:
   - app/Providers/AppServiceProvider.php
   - tests/Feature/Providers/AllowDisabledPkGuardTest.php
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
-notes:
+  red: df0c9d2
+  green: 5529d60
+  refactor: 21ba814 — concat_space style fix (Pint), no behavior change
+notes: Driver check resolves DB::connection() once per event and reuses it for both the check
+  and the statement, rather than two separate facade calls — makes the guard's boundary
+  interaction explicit and the test's mock setup straightforward.
 ```
 
 ---
