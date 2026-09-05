@@ -318,6 +318,62 @@ notes: The rehearsal-evidence and "what actually happened" sections stay explici
 
 ---
 
+## Verify
+
+Run 2026-09-05. Full suite: 243 passed against real local PostgreSQL 18.4
+(`composer test:pgsql`); 242 passed + 1 correctly skipped against SQLite (`composer test`).
+Pint clean (90 files). PHPStan level 9 clean. Coverage (inside the pcov-enabled image): 94.4%
+overall — the new files specifically: `CopyFromLegacyCommand` 90.7% (uncovered lines are the
+pgsql-only sequence-reset branch, not exercised in a SQLite-target coverage run — covered
+separately under `composer test:pgsql` by T005), `VerifyLegacyCopyCommand` 100%,
+`TableManifest` 100%.
+
+```
+R1  Spec coverage:         PASS (8/8 criteria) — 2 notes, not gaps:
+                             - criteria 2 (sequence reset) and 6 (legacy read-only) each have
+                               dedicated tests (T005, T008) beyond just being implied by others.
+                             - criterion 5 (exclusions) is proven two ways: TableManifest's own
+                               unit test (T002) and "touches only the manifest tables" (T003) —
+                               deliberately redundant, not orphaned.
+R2  Task completeness:     PASS (9/9 closed; commit SHAs present, "n/a" beats have a reason)
+R3  Orphan tests:          PASS (0 orphans — every new test file ties to a criterion/contract)
+R4  Contracts match:       PASS (2/2 contracts, consumer tests green, versions/dates current)
+R5  Constitution:          PASS (Articles I-VII, IX, X honored; XI, XII unaffected/honored —
+                             see notes below)
+R6  Research freshness:    PASS (all entries dated 2026-09-05, <60 days)
+R7  Observability:         PASS (command output + exit codes only, as planned — no gap)
+R8  Security review:       PASS — dedicated security-review pass run (this feature moves PII/
+                             auth tokens between databases). No high-confidence findings: table
+                             names in the sequence-reset raw SQL traced to TableManifest's fixed
+                             literal array only (no injection path), no secrets in any new file
+                             (runbook.md's password is an explicit placeholder), no PII beyond
+                             table names/row ids in command output.
+R9  Docs:                  PASS (runbook.md written; CLAUDE.md/test-inventory.md unaffected —
+                             no user-facing behavior changed by this feature)
+R10 Changelog:             PASS (docs/CHANGELOG.md [Unreleased] entry added below)
+```
+
+R5 detail (constitution articles):
+- I (spec-anchored): every task cites a `spec-ref`.
+- II (test-first): Red-before-Green commit order confirmed for T002-T007.
+- III (boundary-only mocks): no mocking used anywhere in this feature — real SQLite double,
+  real local PostgreSQL for pgsql-specific checks (ADR 0004). Stronger than a mock-based
+  approach would have been.
+- IV (contract-first): both contracts written during `plan`, before consumer tests.
+- V (no silent clarification): all 4 spec markers resolved via `AskUserQuestion`, logged in
+  `clarify.md`.
+- VI (ADR for non-local decisions): ADR 0003, ADR 0004 cover the two multi-task decisions.
+- VII (boundaries): `legacy` connection declared and documented.
+- IX (static analysis floor): Pint clean, PHPStan level 9 clean, 94.4% coverage ≥ 80% floor.
+- X (reversible data migrations): this feature's entire purpose — guard/truncate (T004),
+  verification gate (T006/T007), rollback documented (T009/runbook.md).
+- XI, XII: not implicated (no new credentials introduced by this feature; code/docs stayed
+  in English).
+
+No FAIL. Feature closed below.
+
+---
+
 ## Amendments
 
 | Date | Change | Reason |

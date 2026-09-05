@@ -97,5 +97,12 @@ None remaining — all four resolved during clarify (see `clarify.md`).
 ## Closed (filled during verify)
 
 - Date: `<pending>`
-- Commit: `<pending>`
-- Notes: `<pending>`
+- Date: 2026-09-05
+- Commit: (this feature's closing commit — see tasks.md's Verify section for the full SHA list)
+- Notes: All 8 acceptance criteria verified against local fixtures (a second SQLite connection
+  standing in for `legacy`, Feature 001's real local PostgreSQL 18.4 for the pgsql-specific
+  checks — ADR 0004): 243 tests passing against the real local pgsql target, 94.4% coverage. A
+  dedicated security-review pass (this feature moves PII and auth tokens between databases)
+  found no issues. **The real MySQL source and real PostgreSQL target have not been touched at
+  all** — the rehearsal against them, and the cutover itself, remain separate, explicitly-
+  triggered steps documented in `runbook.md` but deliberately not executed here (clarify Q1, Q2).

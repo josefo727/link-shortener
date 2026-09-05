@@ -31,6 +31,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (`compose.yaml`), alongside the existing SQLite-based `composer test`
   - Production still runs on MySQL — this release only adds compatibility, it does not migrate
     any data (see `.specs/001-postgresql-compatibility/`)
+- Data migration tooling for the move off the shared MySQL cluster (not yet executed against
+  production)
+  - `php artisan db:copy-from-legacy [--truncate]` copies `users`, `short_urls`, and
+    `personal_access_tokens` from a new `legacy` connection into the target database, field for
+    field, and resets PostgreSQL's identity sequences afterward
+  - `php artisan db:verify-copy` compares every row of every copied table between the two
+    databases and exits non-zero if any differ
+  - Built and proven entirely against local fixtures — no real database credentials are used by
+    this project's own test suite (see `.specs/002-data-migration/`)
+  - Cutover and rollback runbook written (`.specs/002-data-migration/runbook.md`); the actual
+    cutover against production is a separate, explicitly-triggered step, not part of this release
 
 ### Changed
 - Updated User model with HasApiTokens trait for Sanctum
