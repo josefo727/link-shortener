@@ -103,12 +103,13 @@ F: extract the per-table chunked-copy step into a small private method if the lo
 files:
   - app/Console/Commands/CopyFromLegacyCommand.php
   - tests/Feature/Database/CopyFromLegacyCommandTest.php
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
-notes:
+  red: 799ca17
+  green: d3c3919
+  refactor: skipped — no smell detected, Pint/PHPStan clean
+notes: Verified green against both engines: composer test (SQLite) and composer test:pgsql (real
+  local PostgreSQL 18.4).
 ```
 
 ---
