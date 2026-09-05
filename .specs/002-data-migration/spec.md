@@ -98,7 +98,7 @@ None remaining — all four resolved during clarify (see `clarify.md`).
 
 - Date: `<pending>`
 - Date: 2026-09-05
-- Commit: (this feature's closing commit — see tasks.md's Verify section for the full SHA list)
+- Commit: a3f6b4a
 - Notes: All 8 acceptance criteria verified against local fixtures (a second SQLite connection
   standing in for `legacy`, Feature 001's real local PostgreSQL 18.4 for the pgsql-specific
   checks — ADR 0004): 243 tests passing against the real local pgsql target, 94.4% coverage. A
