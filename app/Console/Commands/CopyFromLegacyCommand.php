@@ -22,21 +22,8 @@ final class CopyFromLegacyCommand extends Command
 
     public function handle(): int
     {
-        $populated = $this->populatedManifestTables();
-
-        if ($populated !== []) {
-            if (! $this->option('truncate')) {
-                $this->error(sprintf(
-                    'The target already holds rows in: %s. Nothing was written. Re-run with --truncate to replace them.',
-                    implode(', ', $populated),
-                ));
-
-                return self::FAILURE;
-            }
-
-            foreach ($populated as $table) {
-                DB::table($table)->delete();
-            }
+        if (! $this->guardOrTruncateTarget()) {
+            return self::FAILURE;
         }
 
         $totalRows = 0;
@@ -53,14 +40,35 @@ final class CopyFromLegacyCommand extends Command
     }
 
     /**
-     * @return list<string>
+     * Refuses (and reports why) when the target already holds rows in a manifest table, unless
+     * --truncate was given, in which case those rows are deleted first. Returns whether the
+     * caller should proceed with the copy.
      */
-    private function populatedManifestTables(): array
+    private function guardOrTruncateTarget(): bool
     {
-        return array_values(array_filter(
+        $populated = array_values(array_filter(
             TableManifest::tables(),
             fn (string $table): bool => DB::table($table)->count() > 0,
         ));
+
+        if ($populated === []) {
+            return true;
+        }
+
+        if (! $this->option('truncate')) {
+            $this->error(sprintf(
+                'The target already holds rows in: %s. Nothing was written. Re-run with --truncate to replace them.',
+                implode(', ', $populated),
+            ));
+
+            return false;
+        }
+
+        foreach ($populated as $table) {
+            DB::table($table)->delete();
+        }
+
+        return true;
     }
 
     private function copyTable(string $table): int
