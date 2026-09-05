@@ -19,6 +19,10 @@ composer dev
 # Run all tests
 composer test
 
+# Run all tests against PostgreSQL instead of the default SQLite (proves PostgreSQL
+# compatibility; requires the `pgsql` compose service up: docker compose up -d pgsql)
+composer test:pgsql
+
 # Run a single test file
 php artisan test tests/Unit/Services/CodeGeneratorServiceTest.php
 
