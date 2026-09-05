@@ -250,6 +250,59 @@ notes: Ordered last so it documents the actual final command name/behavior from 
 
 ---
 
+## Verify
+
+Run 2026-09-05. Full suite: 226 tests, 470 assertions — green against SQLite (`composer test`),
+real PostgreSQL 18.4 (`composer test:pgsql`), and real MySQL 8.4 (ad hoc, see below). Pint clean
+(83 files). PHPStan level 9 clean.
+
+```
+R1  Spec coverage:         PASS (8/8 criteria) — 2 notes, not gaps:
+                             - criterion 1: sslmode-configurable is unit-tested (T003); actual
+                               TLS negotiation isn't exercised locally (no SSL-enabled server in
+                               dev tooling) — only provable at the real DigitalOcean cutover,
+                               out of this feature's scope.
+                             - criteria 2 and 7 are regression/integration criteria with no
+                               dedicated spec-ref'd unit test; proven instead by the full suite
+                               passing against real PostgreSQL (T005/T006) and, closed during
+                               this verify pass, against real MySQL (see below).
+R2  Task completeness:     PASS (7/7 closed; commit SHAs present, "n/a" beats have a reason)
+R3  Orphan tests:          PASS (0 orphans — both new test files tie to a contract + criterion)
+R4  Contracts match:       PASS (2/2 contracts, consumer tests green, versions/dates current)
+R5  Constitution:          PASS (Articles I, II, III, IV, V, VI, VII, IX honored; X, XI, XII n/a
+                             or unaffected — see notes below)
+R6  Research freshness:    PASS (all entries dated 2026-09-05, <60 days)
+R7  Observability:         N/A (no new logs/metrics/traces declared as needed in plan.md)
+R8  Security review:       N/A (no auth/money/PII/external-write surface touched)
+R9  Docs:                  PASS (CLAUDE.md, test-inventory.md updated)
+R10 Changelog:             PASS (docs/CHANGELOG.md [Unreleased] entry added)
+```
+
+Gaps found and closed during this verify pass (not assumed, actually run):
+- Criterion 7 had never been run against a real MySQL server — ran the suite against the
+  project's `mysql` compose service: 226 passed, 470 assertions, no regression.
+- Criterion 8's pcov install had only been checked via `php -m`, not an actual coverage run —
+  ran the suite with `--coverage` inside the built production image: **94.3%** total, above the
+  80% floor. `test-inventory.md`'s coverage gap is now closed.
+
+R5 detail (constitution articles):
+- I (spec-anchored): every task cites a `spec-ref`.
+- II (test-first): Red-before-Green commit order confirmed in history for T002, T003, T004.
+- III (boundary-only mocks): T004's mocks target the Database boundary only (declared in
+  Article VII), consistent with `contracts/migration-driver-guard.md`.
+- IV (contract-first): both contracts written during `plan` phase, before their consumer tests.
+- V (no silent clarification): all 4 spec markers resolved via `AskUserQuestion`, logged in
+  `clarify.md`.
+- VI (ADR for non-local decisions): ADR 0001, ADR 0002 cover the two multi-task decisions.
+- VII (boundaries): Database boundary extended to a second engine; documented in `plan.md`.
+- IX (static analysis floor): Pint clean, PHPStan level 9 clean, coverage 94.3% ≥ 80% floor.
+- X, XI, XII: not implicated by this feature (no data migration, no new credentials, docs/code
+  stayed in English as required).
+
+No FAIL. Feature closed below.
+
+---
+
 ## Amendments
 
 | Date | Change | Reason |

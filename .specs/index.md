@@ -2,7 +2,10 @@
 
 ## Modules under SDD+TDD
 
-- (empty; first feature pending — see below)
+- **PostgreSQL compatibility** (Feature 001, closed 2026-09-05): `Dockerfile` (PHP driver/pcov),
+  `config/database.php` (pgsql connection), `AppServiceProvider::allowDisabledPk()` (migration
+  driver guard), local test tooling (`compose.yaml`, `phpunit.pgsql.xml`,
+  `composer test:pgsql`). See `.specs/001-postgresql-compatibility/`.
 
 ## Modules under legacy rules
 
@@ -26,10 +29,9 @@ See `constitution.md` Article VII for the authoritative, evidenced list. Summary
 
 ## Planned features (this onboarding's reason for existing)
 
-1. **Feature 001 — PostgreSQL compatibility.** Enable the `pdo_pgsql` driver in the Docker image,
-   fix the hardcoded `sslmode`, guard `AppServiceProvider::allowDisabledPk()` by driver, add a
-   `pgsql` service to `compose.yaml` and point the test suite at it. Ships and deploys while
-   production stays on MySQL. See `prompt-db-migration.md` §6, blockers 1, 2, 3, 5.
+1. ~~**Feature 001 — PostgreSQL compatibility.**~~ **Closed 2026-09-05** — see
+   `.specs/001-postgresql-compatibility/`. Production still runs on MySQL; this feature only
+   proved compatibility (`prompt-db-migration.md` §6, blockers 1, 2, 3, 5).
 2. **Feature 002 — Data migration.** `legacy` connection + `LEGACY_DB_*`, a
    `db:copy-from-legacy` command over the 3-table manifest (`users`, `short_urls`,
    `personal_access_tokens`), sequence reset, and a row-by-row verification gate. Cutover follows

@@ -76,6 +76,11 @@ None remaining — all four resolved during clarify (see `clarify.md`).
 
 ## Closed (filled during verify)
 
-- Date: `<pending>`
-- Commit: `<pending>`
-- Notes: `<pending>`
+- Date: 2026-09-05
+- Commit: (this feature's closing commit — see tasks.md's Verify section for the full SHA list)
+- Notes: All 8 acceptance criteria verified with real evidence, not just unit tests — a real
+  PostgreSQL 18.4 container (criteria 1, 2, 4, 5), a real MySQL container (criterion 7), and a
+  real coverage run inside the built production image (criterion 8, 94.3%). Two gaps the plan
+  had assumed rather than run were caught and closed during `/sdd-verify` itself: the MySQL
+  regression run and the coverage run had not actually happened until then. See
+  `tasks.md` §Verify for the full R1–R10 report.
