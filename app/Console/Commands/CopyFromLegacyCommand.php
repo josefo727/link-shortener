@@ -32,6 +32,8 @@ final class CopyFromLegacyCommand extends Command
             $rowsCopied = $this->copyTable($table);
             $totalRows += $rowsCopied;
             $this->line(sprintf('%s: %d rows copied', $table, $rowsCopied));
+
+            $this->resetSequenceIfNeeded($table, $rowsCopied);
         }
 
         $this->info(sprintf('%d tables copied (%d rows)', count(TableManifest::tables()), $totalRows));
@@ -90,5 +92,23 @@ final class CopyFromLegacyCommand extends Command
         });
 
         return $copied;
+    }
+
+    /**
+     * Resets the target's identity sequence so the next insert can't collide with a copied id.
+     * A no-op when the target driver isn't PostgreSQL (nothing to reset -- SQLite/MySQL
+     * auto-increment already tracks the highest inserted value) or when nothing was copied into
+     * this table. $table always comes from TableManifest::tables(), never user input.
+     */
+    private function resetSequenceIfNeeded(string $table, int $rowsCopied): void
+    {
+        if ($rowsCopied === 0 || DB::connection()->getDriverName() !== 'pgsql') {
+            return;
+        }
+
+        DB::statement(
+            "SELECT setval(pg_get_serial_sequence(?, 'id'), (SELECT MAX(id) FROM {$table}))",
+            [$table],
+        );
     }
 }
