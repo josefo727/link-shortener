@@ -170,11 +170,11 @@ F: skipped — no smell detected.
 files:
   - app/Console/Commands/CopyFromLegacyCommand.php
   - tests/Feature/Database/CopyFromLegacyCommandTest.php
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: 54de460
+  green: 96c3a34
+  refactor: skipped — no smell detected, Pint/PHPStan clean
 notes: This is the one task in this feature whose test opens a real (local, non-production)
   PostgreSQL connection — Feature 001's `pgsql` compose service. Still never the real production
   target (ADR 0004).
