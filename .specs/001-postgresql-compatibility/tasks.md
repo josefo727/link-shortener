@@ -204,12 +204,16 @@ G: run both suites; fix, with its own R-G-F, any PostgreSQL-specific failure tha
    portability traps in this schema, but this task exists to prove that rather than assume it).
 F: n/a unless a fix from this task reveals duplicated logic worth extracting.
 files: (open-ended — depends on whether a PostgreSQL-specific failure surfaces)
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: n/a — verification task, no failing state to commit
+  green: n/a — no code change needed; both runs passed clean, evidence below
+  refactor: n/a — nothing surfaced to refactor
 notes: Depends on T003, T004, T005. Does not depend on T001/T002 (see track note above).
+  Final verification, both clean: `composer test` (SQLite) — 226 passed, 470 assertions;
+  `composer test:pgsql` (postgres:18-alpine) — 226 passed, 470 assertions. No PostgreSQL-specific
+  failure surfaced, consistent with the discovery report finding no MySQL/PostgreSQL portability
+  traps in this schema.
 ```
 
 ---
