@@ -305,13 +305,15 @@ G: write .specs/002-data-migration/runbook.md, adapting the shape of the blog's 
 F: skipped — doc-only.
 files:
   - .specs/002-data-migration/runbook.md
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: n/a — documentation task
+  green: babace0
+  refactor: skipped — doc-only
 notes: The rehearsal-evidence and "what actually happened" sections stay explicitly blank/marked
-  pending until the real, separate, VPS-only steps actually run — never fabricated.
+  pending until the real, separate, VPS-only steps actually run — never fabricated. Redis prefix
+  confirmed against config/database.php (Str::slug(APP_NAME).'-database-'), not assumed from the
+  source doc alone.
 ```
 
 ---
