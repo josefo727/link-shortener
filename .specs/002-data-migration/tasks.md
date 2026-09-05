@@ -68,11 +68,11 @@ F: skipped — no smell detected, it's two constant arrays.
 files:
   - app/Database/LegacyMigration/TableManifest.php
   - tests/Unit/Database/TableManifestTest.php
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: 0a9878a
+  green: 3104f11
+  refactor: skipped — no smell detected, Pint/PHPStan clean
 notes:
 ```
 
