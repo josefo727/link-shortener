@@ -25,8 +25,9 @@ that also reaches unrelated production schemas on a cluster that was compromised
 3. A verification command compares every row of every copied table field by field between source
    and target, and exits non-zero if any table or any row differs.
 4. Running the copy command again against a target that already holds the previously-copied data
-   does not silently duplicate rows or corrupt state — it either refuses by default or replaces
-   cleanly, so the same command can be rehearsed more than once before the real cutover.
+   refuses by default (non-zero exit, no rows written) rather than silently duplicating anything;
+   an explicit flag makes it replace the target's data cleanly instead, so the same command can
+   be rehearsed more than once before the real cutover.
 5. The `migrations` table and every transient table (`cache`, `cache_locks`, `sessions`, `jobs`,
    `job_batches`, `failed_jobs`, `password_reset_tokens`) are excluded from the copy.
 6. The legacy MySQL source receives no writes at any point before, during, or after the copy —
@@ -47,6 +48,11 @@ that also reaches unrelated production schemas on a cluster that was compromised
 - Executing the actual production cutover. This feature produces and rehearses the tooling and
   the runbook; pulling the trigger on live production is a separate, explicitly-confirmed action
   that happens after this feature closes — not automatically as part of `implement` or `verify`.
+- Rehearsing against the *real* MySQL source and *real* PostgreSQL target. This feature's
+  `implement`/`verify` phases prove the copy/verify commands against realistic local fixtures
+  only. A rehearsal against the real databases runs later, exclusively via SSH on the VPS in a
+  throwaway container (never from this local session), as its own separate, explicitly-triggered
+  step immediately before the real cutover (clarify Q1, Q2).
 - Any schema change (columns, types, indexes) — this is a data copy, not a migration of shape.
 - Decommissioning the legacy MySQL database, or rotating/revoking its credentials — tracked as a
   dated follow-up after the retention window, not part of this feature.
@@ -75,21 +81,7 @@ that also reaches unrelated production schemas on a cluster that was compromised
 
 ## Open questions
 
-- [NEEDS CLARIFICATION: where does the rehearsal against the *real* MySQL source and *real*
-  PostgreSQL target run — from this local machine/session, or exclusively via SSH on the VPS (as
-  the blog project's equivalent feature did, in a throwaway container)? DigitalOcean managed
-  databases commonly restrict connections by trusted source/VPC, so this may not be a free choice
-  — and it also determines how much exposure the plaintext credentials in
-  `prompt-db-migration.md` get beyond where they already sit.]
-- [NEEDS CLARIFICATION: does closing this feature require an actual rehearsal against the real
-  source and target databases (like the blog did), or is a rehearsal against realistic
-  fixtures/dummy data sufficient to close Feature 002 — with the real-database rehearsal
-  happening as its own separate, explicitly-triggered step immediately before the real cutover?]
-- [NEEDS CLARIFICATION: should re-running the copy command against an already-populated target
-  refuse by default and require an explicit flag to replace (matching the blog's
-  guard-unless---truncate pattern), or behave some other way?]
-- [NEEDS CLARIFICATION: naming — match the blog's command names (`db:copy-from-legacy`,
-  `db:verify-copy`) for consistency across the owner's projects, or use different names?]
+None remaining — all four resolved during clarify (see `clarify.md`).
 
 ## Glossary additions
 
