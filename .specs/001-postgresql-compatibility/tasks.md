@@ -41,7 +41,7 @@ files:
 status: closed
 commits:
   red: n/a — spike, no automated test
-  green: (this task's docs commit)
+  green: fcaddc5
   refactor: skipped — spike, nothing to refactor
 notes: Confirmed via direct `docker run` experimentation (not just docs): pdo_pgsql/pgsql are
   already compiled in, just excluded by PHP_DISMOD (env-only fix, verified). pcov needs the PECL
