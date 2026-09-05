@@ -16,12 +16,29 @@ use Illuminate\Support\Facades\DB;
  */
 final class CopyFromLegacyCommand extends Command
 {
-    protected $signature = 'db:copy-from-legacy';
+    protected $signature = 'db:copy-from-legacy {--truncate : Replace the target tables\' existing data instead of refusing to run}';
 
     protected $description = "Copy this application's business tables from the legacy database into the target database.";
 
     public function handle(): int
     {
+        $populated = $this->populatedManifestTables();
+
+        if ($populated !== []) {
+            if (! $this->option('truncate')) {
+                $this->error(sprintf(
+                    'The target already holds rows in: %s. Nothing was written. Re-run with --truncate to replace them.',
+                    implode(', ', $populated),
+                ));
+
+                return self::FAILURE;
+            }
+
+            foreach ($populated as $table) {
+                DB::table($table)->delete();
+            }
+        }
+
         $totalRows = 0;
 
         foreach (TableManifest::tables() as $table) {
@@ -33,6 +50,17 @@ final class CopyFromLegacyCommand extends Command
         $this->info(sprintf('%d tables copied (%d rows)', count(TableManifest::tables()), $totalRows));
 
         return self::SUCCESS;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function populatedManifestTables(): array
+    {
+        return array_values(array_filter(
+            TableManifest::tables(),
+            fn (string $table): bool => DB::table($table)->count() > 0,
+        ));
     }
 
     private function copyTable(string $table): int
