@@ -56,6 +56,10 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "test:pgsql": [
+            "@php artisan config:clear --ansi",
+            "./vendor/bin/pest --configuration=phpunit.pgsql.xml"
+        ],
         "lint": "./vendor/bin/pint",
         "lint:test": "./vendor/bin/pint --test",
         "analyse": "./vendor/bin/phpstan analyse",
