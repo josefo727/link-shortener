@@ -137,11 +137,11 @@ F: extract the pre-flight check into its own method if CopyFromLegacyCommand::ha
 files:
   - app/Console/Commands/CopyFromLegacyCommand.php
   - tests/Feature/Database/CopyFromLegacyCommandTest.php
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: 12c31bf
+  green: 8fc7b23
+  refactor: 584e225 — extracted guardOrTruncateTarget()
 notes:
 ```
 
