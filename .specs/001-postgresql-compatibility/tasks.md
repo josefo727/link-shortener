@@ -168,14 +168,20 @@ files:
   - compose.yaml
   - phpunit.pgsql.xml
   - composer.json
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: n/a — verified (`composer test:pgsql` → "Command test:pgsql is not defined"), nothing to
+    commit for an absent script
+  green: f6a3bbd
+  refactor: skipped — no smell detected
 notes: compose.yaml here is Laravel Sail's local-dev compose file — a different Docker setup
   from the production Dockerfile touched in T002. Local PHP (this machine's Herd install)
   already has pdo_pgsql loaded, confirmed while planning — this task does not depend on T002.
+  Two real problems fixed during implement (not anticipated in the plan): Postgres 18's changed
+  volume-mount convention, and `php artisan test --configuration=` duplicating the flag
+  internally (worked around by calling `./vendor/bin/pest --configuration=` directly). Verified
+  end to end: `composer test:pgsql` — 226 tests, 470 assertions, exit 0 against real
+  postgres:18-alpine.
 ```
 
 ---
