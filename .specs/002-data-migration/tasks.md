@@ -266,12 +266,14 @@ F: skipped — test-only task.
 files:
   - tests/Feature/Database/CopyFromLegacyCommandTest.php
   - tests/Feature/Database/VerifyLegacyCopyCommandTest.php
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
-notes:
+  red: n/a — regression guarantee for already-implemented behavior
+  green: 45a18ae
+  refactor: skipped — test-only task, Pint clean
+notes: Both tests passed immediately, as expected (no production code change needed). Verified
+  against both engines. Also added LegacyFixture::useReadOnlySqliteConnection() to
+  tests/Support/LegacyFixture.php.
 ```
 
 ---
