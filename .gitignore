@@ -25,3 +25,6 @@ Thumbs.db
 
 # Local migration notes with credentials
 /prompt-*.md
+
+# Local rescue backups (real data dumps) — never commit
+/.local-backups/
