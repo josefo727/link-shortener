@@ -80,3 +80,16 @@ it('names every mismatching table, not just the first one found', function (): v
         ->and($output)->toContain('users')
         ->and($output)->toContain('personal_access_tokens');
 });
+
+it('never writes to a read-only legacy connection', function (): void {
+    $path = LegacyFixture::useReadOnlySqliteConnection();
+
+    try {
+        Artisan::call('db:copy-from-legacy');
+        $verifyExitCode = Artisan::call('db:verify-copy');
+
+        expect($verifyExitCode)->toBe(0);
+    } finally {
+        @unlink($path);
+    }
+});

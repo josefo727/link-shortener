@@ -158,3 +158,19 @@ it('resets PostgreSQL identity sequences so a new row never collides with a copi
     fn (): bool => DB::connection()->getDriverName() !== 'pgsql',
     'sequence reset is PostgreSQL-specific -- meaningless against SQLite (ADR 0004)',
 );
+
+it('never writes to a read-only legacy connection, across the fresh, guard, and --truncate paths', function (): void {
+    $path = LegacyFixture::useReadOnlySqliteConnection();
+
+    try {
+        $freshExitCode = Artisan::call('db:copy-from-legacy');
+        $guardExitCode = Artisan::call('db:copy-from-legacy'); // target now populated, no --truncate
+        $truncateExitCode = Artisan::call('db:copy-from-legacy', ['--truncate' => true]);
+
+        expect($freshExitCode)->toBe(0)
+            ->and($guardExitCode)->toBe(1)
+            ->and($truncateExitCode)->toBe(0);
+    } finally {
+        @unlink($path);
+    }
+});

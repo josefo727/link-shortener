@@ -28,6 +28,33 @@ final class LegacyFixture
         Artisan::call('migrate', ['--database' => 'legacy', '--force' => true]);
     }
 
+    /**
+     * Sets up 'legacy' as a file-based SQLite database (needed so it can be reopened
+     * read-only), migrated and seeded, then flips it to SQLite's `PRAGMA query_only` mode.
+     * Any write attempted against this connection from that point on raises a real "attempt to
+     * write a readonly database" error -- proving contracts/legacy-database.md's read-only
+     * guarantee for real, not just by discipline. Returns the temp file path for cleanup.
+     */
+    public static function useReadOnlySqliteConnection(): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'legacy-readonly-').'.sqlite';
+
+        config(['database.connections.legacy' => [
+            'driver' => 'sqlite',
+            'database' => $path,
+            'prefix' => '',
+            'foreign_key_constraints' => false,
+        ]]);
+        DB::purge('legacy');
+
+        Artisan::call('migrate', ['--database' => 'legacy', '--force' => true]);
+        self::seed();
+
+        DB::connection('legacy')->statement('PRAGMA query_only = ON');
+
+        return $path;
+    }
+
     public static function seed(): void
     {
         DB::connection('legacy')->table('users')->insert([
