@@ -21,16 +21,25 @@ final class VerifyLegacyCopyCommand extends Command
 
     public function handle(): int
     {
+        $mismatchedTables = [];
+
         foreach (TableManifest::tables() as $table) {
             $mismatch = $this->compareTable($table);
 
             if ($mismatch !== null) {
+                $mismatchedTables[] = $table;
                 $this->error(sprintf('%s: MISMATCH (%s)', $table, $mismatch));
 
-                return self::FAILURE;
+                continue;
             }
 
             $this->line(sprintf('%s: match', $table));
+        }
+
+        if ($mismatchedTables !== []) {
+            $this->error(sprintf('%d table(s) differ: %s', count($mismatchedTables), implode(', ', $mismatchedTables)));
+
+            return self::FAILURE;
         }
 
         $this->info('All tables match.');
