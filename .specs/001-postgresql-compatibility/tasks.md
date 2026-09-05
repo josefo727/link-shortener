@@ -72,13 +72,14 @@ F: skipped — no smell detected, single-purpose Dockerfile edit.
 files:
   - Dockerfile
   - scripts/check-php-extensions.sh
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: 7ca1e86
+  green: 916cdef
+  refactor: skipped — no smell detected, single-purpose Dockerfile edit
 notes: Depends on T001's confirmed mechanism. Does not touch VPS deployment (clarify Q4) — image
-  is built and checked locally/in this repo only.
+  is built and checked locally/in this repo only. MySQL regression bullet confirmed: pdo_mysql/
+  mysqlnd were never in PHP_DISMOD, still present in the built image.
 ```
 
 ---
