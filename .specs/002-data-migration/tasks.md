@@ -38,11 +38,11 @@ F: skipped — config-only task.
 files:
   - config/database.php
   - .env.example
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: n/a — scaffolding
+  green: 82a8f5f
+  refactor: skipped — config-only task
 notes:
 ```
 
