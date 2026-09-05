@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API token management command: `php artisan api:token:create`
 - Rate limiting (60 requests/minute per user)
 - Support for `expires_at` field in API creation
+- PostgreSQL 18 compatibility (prerequisite for migrating off the shared MySQL cluster)
+  - Docker image now provides the `pdo_pgsql`, `pgsql`, and `pcov` (code coverage) PHP extensions
+  - `DB_SSLMODE` is configurable via env (previously hardcoded to `prefer`)
+  - The MySQL-only migration primary-key-enforcement statement is now driver-aware — it no
+    longer fires against PostgreSQL or SQLite, regardless of the `ALLOW_DISABLED_PK` env value
+  - `composer test:pgsql` runs the full test suite against a local PostgreSQL 18 service
+    (`compose.yaml`), alongside the existing SQLite-based `composer test`
+  - Production still runs on MySQL — this release only adds compatibility, it does not migrate
+    any data (see `.specs/001-postgresql-compatibility/`)
 
 ### Changed
 - Updated User model with HasApiTokens trait for Sanctum

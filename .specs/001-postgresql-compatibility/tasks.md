@@ -80,6 +80,9 @@ commits:
 notes: Depends on T001's confirmed mechanism. Does not touch VPS deployment (clarify Q4) — image
   is built and checked locally/in this repo only. MySQL regression bullet confirmed: pdo_mysql/
   mysqlnd were never in PHP_DISMOD, still present in the built image.
+  Verify-time evidence (2026-09-05): ran the full suite with `--coverage` inside the built image
+  (real pcov, not just `php -m`) — 94.3% total coverage, closing criterion 8 and the
+  previously-unmeasured gap in test-inventory.md.
 ```
 
 ---
@@ -214,6 +217,10 @@ notes: Depends on T003, T004, T005. Does not depend on T001/T002 (see track note
   `composer test:pgsql` (postgres:18-alpine) — 226 passed, 470 assertions. No PostgreSQL-specific
   failure surfaced, consistent with the discovery report finding no MySQL/PostgreSQL portability
   traps in this schema.
+  Verify-time evidence (2026-09-05): criterion 7 ("MySQL remains fully functional") had not
+  actually been run against a real MySQL server until `/sdd-verify` — closed the gap by running
+  the suite against the project's real `mysql` compose service: 226 passed, 470 assertions, no
+  regression.
 ```
 
 ---

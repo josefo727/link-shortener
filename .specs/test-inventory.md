@@ -5,11 +5,12 @@ Lightweight pass, per the quick-path variant (repo <2kLOC). Full run: `composer 
 
 ## Coverage
 
-**Not measured.** No coverage driver installed (`php -m` shows neither `pcov` nor `xdebug`).
-No fabricated number is recorded here — installing a coverage driver is a fair candidate for
-Feature 001 (PostgreSQL compatibility) since that feature is already touching `compose.yaml` /
-the Docker image, or a small standalone follow-up. The constitution's coverage-floor article
-(Article IX) cannot be enforced by CI today because there is no CI; see `index.md`.
+**Closed by Feature 001** (2026-09-05). `pcov` is now installed in the production Docker image
+(T002). Verified end to end: running the suite with `--coverage` inside the built image reports
+**94.3% total coverage** — well above the project's 80% floor (`CLAUDE.md`). This was not
+measurable on this dev machine's host PHP (no coverage driver there) or in CI (none exists) —
+only inside the container, which is where `composer test:coverage` is expected to run until CI
+exists (still a separate follow-up, out of scope for Feature 001 per its clarify log).
 
 ## Pyramid shape
 
@@ -43,9 +44,9 @@ None significant found. Notes:
 
 ## Ranked test-debt (address opportunistically, not as a backlog)
 
-1. No coverage measurement — install `pcov` (lighter than `xdebug`) when next touching the
-   Docker image or CI setup.
-2. No CI — currently nothing runs the suite except local `composer test`. Worth a minimal
-   GitHub Actions workflow once Feature 001 adds a `pgsql` test service, so the suite runs on
-   the engine production uses (constitution Article IX / project's standing rule from ADR 0003
-   on the sibling `my-blog` project).
+1. ~~No coverage measurement~~ — closed by Feature 001 (T002 installs `pcov`; 94.3% confirmed).
+2. No CI — currently nothing runs the suite except local `composer test`/`composer test:pgsql`.
+   Worth a minimal GitHub Actions workflow now that Feature 001 added a `pgsql` test service, so
+   the suite runs on the engine production uses (constitution Article IX / project's standing
+   rule from ADR 0003 on the sibling `my-blog` project). Explicitly out of scope for Feature 001
+   (clarify Q2).
