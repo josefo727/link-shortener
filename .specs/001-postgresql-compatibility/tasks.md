@@ -38,12 +38,16 @@ G: build a throwaway image locally with the candidate install line(s); run `php 
 F: skipped — spike, nothing to refactor.
 files:
   - .specs/001-postgresql-compatibility/research.md
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
-notes: This task produces no application code — only the confirmed mechanism T002 will use.
+  red: n/a — spike, no automated test
+  green: (this task's docs commit)
+  refactor: skipped — spike, nothing to refactor
+notes: Confirmed via direct `docker run` experimentation (not just docs): pdo_pgsql/pgsql are
+  already compiled in, just excluded by PHP_DISMOD (env-only fix, verified). pcov needs the PECL
+  path — `apk add --virtual .build-deps autoconf gcc g++ make && pecl install pcov &&
+  docker-php-ext-enable pcov && apk del .build-deps` — verified end-to-end, survives cleanup.
+  Full findings in research.md.
 ```
 
 ---

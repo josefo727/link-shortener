@@ -84,3 +84,49 @@ PHP_DISMOD=<comma-separated module list>   # disables listed modules; the projec
   assumes a specific install command up front. If the base image doesn't bundle it, the fallback
   is `apk add --no-cache $PHPIZE_DEPS && pecl install pcov && docker-php-ext-enable pcov` (standard
   PECL install pattern), verified the same way.
+
+---
+
+## `T001 spike results — confirmed, 2026-09-05`
+
+- **captured:** 2026-09-05
+- **source:** direct experimentation against `webdevops/php-nginx:8.4-alpine` via `docker run`
+  (see T001 in `tasks.md`).
+- **why consulted:** close the open question above with an actual verified answer instead of
+  documentation (which didn't cover it).
+
+### Findings
+
+1. **`pdo_pgsql`/`pgsql` are already compiled into the image**, just excluded via `PHP_DISMOD`.
+   Confirmed directly: running the image with `pdo_pgsql,pgsql` removed from `PHP_DISMOD` (all
+   other entries unchanged) makes `php -m` list both. No install step needed for blocker 1 — an
+   env-var/Dockerfile edit is sufficient.
+2. **`pcov` is NOT pre-built** and is **not** available as a usable Alpine package for this
+   image. `apk search` does show `php84-pecl-pcov`, but it installs into Alpine's own unrelated
+   system PHP 8.4 tree (`/etc/php84/conf.d`, `/usr/lib/php84/modules`) — a completely different,
+   unused PHP install. The image's actual running PHP is a custom build under
+   `/usr/local` (`extension_dir` = `/usr/local/lib/php/extensions/no-debug-non-zts-20240924`), the
+   standard docker-library layout. The `apk` package is a red herring for this image.
+3. **The working mechanism is PECL, with build tools installed and removed in the same layer**:
+   ```dockerfile
+   RUN apk add --no-cache --virtual .build-deps autoconf gcc g++ make \
+       && pecl install pcov \
+       && docker-php-ext-enable pcov \
+       && apk del .build-deps
+   ```
+   Verified end-to-end in a real container: `pecl install pcov` fails outright without
+   `autoconf` (`phpize' failed`) — `gcc`/`g++`/`make` are also required to actually compile it,
+   none of which are present in the base image by default. After the four-line sequence above,
+   `php -m` lists `pcov`, and it survives `apk del .build-deps` (the compiled `.so` and its
+   `conf.d` ini are independent of the removed build toolchain).
+4. `docker-php-ext-enable` and `pecl`/`php-config`/`phpize` are all present in the base image, so
+   no additional base-image change is needed to make the PECL path available.
+
+### Decision impact
+
+- Ties to `plan.md` §Module layout / T002: the Dockerfile change is now fully specified — remove
+  `pdo_pgsql,pgsql` from `PHP_DISMOD`, and add the four-line `RUN` block above for `pcov`, as a
+  `.build-deps` virtual package removed in the same layer (keeps the final image size down,
+  consistent with how the project's Dockerfile already installs/doesn't retain other build-time
+  packages).
+- Closes the open question from the entry above — no further spike needed.
