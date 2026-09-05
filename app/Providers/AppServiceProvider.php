@@ -44,16 +44,33 @@ final class AppServiceProvider extends ServiceProvider
      * Adjusts the MySQL session configuration to allow or require primary keys during migrations.
      *
      * This method listens for migration start and end events to dynamically toggle
-     * the `sql_require_primary_key` session setting in MySQL.
+     * the `sql_require_primary_key` session setting in MySQL. The statement is MySQL-only
+     * syntax, so each listener re-checks the active connection's driver at event time and
+     * no-ops on any other driver (see ADR 0001) rather than relying solely on the
+     * ALLOW_DISABLED_PK env gate above.
      */
     private function allowDisabledPk(): void
     {
         Event::listen(MigrationsStarted::class, function (): void {
-            DB::statement('SET SESSION sql_require_primary_key=0');
+            $this->toggleMysqlPrimaryKeyRequirement(required: false);
         });
 
         Event::listen(MigrationsEnded::class, function (): void {
-            DB::statement('SET SESSION sql_require_primary_key=1');
+            $this->toggleMysqlPrimaryKeyRequirement(required: true);
         });
+    }
+
+    /**
+     * Toggles MySQL's sql_require_primary_key session setting, a no-op on any other driver.
+     */
+    private function toggleMysqlPrimaryKeyRequirement(bool $required): void
+    {
+        $connection = DB::connection();
+
+        if ($connection->getDriverName() !== 'mysql') {
+            return;
+        }
+
+        $connection->statement('SET SESSION sql_require_primary_key=' . ($required ? '1' : '0'));
     }
 }
