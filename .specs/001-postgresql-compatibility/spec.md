@@ -77,7 +77,7 @@ None remaining — all four resolved during clarify (see `clarify.md`).
 ## Closed (filled during verify)
 
 - Date: 2026-09-05
-- Commit: (this feature's closing commit — see tasks.md's Verify section for the full SHA list)
+- Commit: 673a893
 - Notes: All 8 acceptance criteria verified with real evidence, not just unit tests — a real
   PostgreSQL 18.4 container (criteria 1, 2, 4, 5), a real MySQL container (criterion 7), and a
   real coverage run inside the built production image (criterion 8, 94.3%). Two gaps the plan
