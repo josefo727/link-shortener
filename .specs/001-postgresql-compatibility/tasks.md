@@ -101,13 +101,14 @@ G: change `'sslmode' => 'prefer'` to `'sslmode' => env('DB_SSLMODE', 'prefer')` 
 F: skipped — one-line config change, nothing to extract.
 files:
   - config/database.php
-  - tests/Feature/Config/DatabasePgsqlConfigTest.php
-status: open
+  - tests/Unit/Config/DatabasePgsqlConfigTest.php
+status: closed
 commits:
-  red:
-  green:
-  refactor:
-notes:
+  red: 94d1203
+  green: 50a7538
+  refactor: skipped — one-line config change, nothing to extract
+notes: Test moved to tests/Unit/Config/ (not Feature/) during implement — it re-requires
+  config/database.php directly with a controlled env, no framework container/DB needed.
 ```
 
 ---
