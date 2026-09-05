@@ -64,6 +64,12 @@ final class VerifyLegacyCopyCommand extends Command
      */
     private function normalize(array $row): array
     {
-        return array_map(static fn ($value): ?string => $value === null ? null : (string) $value, $row);
+        return array_map(static function (mixed $value): ?string {
+            if ($value === null) {
+                return null;
+            }
+
+            return is_scalar($value) ? (string) $value : serialize($value);
+        }, $row);
     }
 }
