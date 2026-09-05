@@ -71,6 +71,6 @@ final class AppServiceProvider extends ServiceProvider
             return;
         }
 
-        $connection->statement('SET SESSION sql_require_primary_key=' . ($required ? '1' : '0'));
+        $connection->statement('SET SESSION sql_require_primary_key='.($required ? '1' : '0'));
     }
 }
