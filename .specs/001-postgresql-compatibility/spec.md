@@ -25,11 +25,16 @@ that also reaches unrelated schemas, without any code getting in the way of that
    target version.
 5. Running the test suite against PostgreSQL requires no manual setup beyond the project's
    existing documented test command — it is wired into the existing local dev tooling.
-6. The application's deployed container image provides the PostgreSQL driver, verifiable at
-   runtime, with no change to application code required to use it.
+6. The project's container image is rebuilt to provide the PostgreSQL driver, verifiable at
+   runtime, with no change to application code required to use it. Deploying that image to the
+   production VPS is a separate, explicitly-triggered step outside this feature's closing
+   criteria.
 7. None of the above changes alter the application's behavior when configured against MySQL —
    MySQL remains fully functional throughout, since production stays on MySQL until this feature
    is deployed and Feature 002 begins.
+8. Running the test suite with a coverage report produces a real, measured coverage percentage
+   (via the `pcov` extension), closing the previously-unmeasured gap recorded in
+   `test-inventory.md`.
 
 ## Non-goals
 
@@ -41,6 +46,11 @@ that also reaches unrelated schemas, without any code getting in the way of that
 - Any change to `CacheService`/`ResolveShortUrlAction` runtime behavior — the Redis
   cached-model risk in `prompt-db-migration.md` §7 is a Feature 002 cutover concern, not a
   compatibility concern.
+- Setting up a CI pipeline (GitHub Actions or otherwise) — none exists today; running the suite
+  against PostgreSQL only needs to work through the existing local dev tooling for this feature.
+  A pipeline stays a separate follow-up.
+- Rebuilding and redeploying the container image to the production VPS — that is a separate,
+  explicitly-triggered step after this feature is reviewed and merged (see criterion 6).
 
 ## Applicable constitution articles
 
@@ -55,17 +65,7 @@ that also reaches unrelated schemas, without any code getting in the way of that
 
 ## Open questions
 
-- [NEEDS CLARIFICATION: should installing a code-coverage driver (`pcov`) ride along with this
-  feature, since it already touches the container image/build, or stay a separate follow-up?]
-- [NEEDS CLARIFICATION: does setting up a CI pipeline (none exists today) belong to this
-  feature, or is it a separate follow-up? Criterion 5 only requires the suite to be runnable
-  locally against PostgreSQL, not automated on every push.]
-- [NEEDS CLARIFICATION: which exact PostgreSQL version/tag gets pinned for local test tooling —
-  match production's `18.6` exactly, or accept any `18.x` image?]
-- [NEEDS CLARIFICATION: does "deployed" in criterion 6 mean this feature's own closing step
-  rebuilds and redeploys the container to the VPS (as `prompt-db-migration.md` describes for the
-  blog's equivalent feature), or does deployment happen as a separate, explicitly-triggered step
-  after the user reviews the change?]
+None remaining — all four resolved during clarify (see `clarify.md`).
 
 ## Glossary additions
 
