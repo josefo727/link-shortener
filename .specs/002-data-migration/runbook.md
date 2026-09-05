@@ -10,10 +10,18 @@ Everything below runs on `vps_josefo_01`, directory `~/www/josefo-link`, contain
 `~/www/nginx-proxy/docker-compose.yml` (service `josefo-link`, bind mount
 `./../josefo-link:/app`). Production Redis is shared across cache, sessions, and queue.
 
-**Precondition, not yet satisfied at the time this runbook was written**: the Docker image must
-already be rebuilt and deployed with `pdo_pgsql` enabled (Feature 001), and this feature's commands
-merged to `master` and deployed, **while still on MySQL** — this runbook does not rebuild the
-image, it assumes that already happened.
+**Precondition — satisfied 2026-09-05.** At the time this runbook was first written, the
+production image had *not* been rebuilt yet (found during the rehearsal below). It has been
+since: `~/www/josefo-link` fast-forwarded to `master` (`54abf4b`, local hardening in
+`docker/supervisord.conf` — workers run as `application`, not `root` — preserved via
+`git stash`/`stash pop` across the update), image rebuilt
+(`docker build -t josefo727/josefo-link . --no-cache`), container recreated via
+`~/www/nginx-proxy/docker-compose.yml`. Confirmed post-recreate: `php -m` lists `pdo_pgsql`,
+`pgsql`, `pcov`, and `pdo_mysql`; `db:show` still reports MySQL (`link_shortener_jrg`) — this
+step changes nothing about which database the app talks to; landing page 200; both
+`queue-worker` processes and `scheduler` running; no new errors in `laravel.log` since the
+recreate (one old, unrelated Redis-auth error from 2026-09-04 predates this entirely). Production
+still runs on MySQL — only capability was added, per Feature 001's non-goal.
 
 ---
 
@@ -117,10 +125,11 @@ the portability traps the blog's 23-table schema had.
 The migration environment (`/root/link-shortener-migration/`) is left in place for the actual
 cutover, not deleted after this rehearsal — see §After the cutover for its eventual cleanup.
 
-**Still outstanding before a real cutover can run**: the production image itself still needs
-Feature 001's changes rebuilt and deployed to `josefo-link-container` (this rehearsal
-deliberately did not do that — it's a separate decision, not a rehearsal step), and
-`~/www/josefo-link` still needs to be brought up to `master`.
+**Update 2026-09-05**: the production image rebuild/deploy and the `~/www/josefo-link` update to
+`master` — both called out above as separate, outstanding decisions — have since happened (see
+the Precondition note at the top of this file). Nothing else is outstanding on the code/image
+side; the actual cutover (§Cutover below) is the only remaining step, and it stays a separate,
+explicitly-triggered action.
 
 ---
 
