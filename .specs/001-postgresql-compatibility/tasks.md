@@ -232,11 +232,11 @@ G: add the line to CLAUDE.md.
 F: skipped — doc-only.
 files:
   - CLAUDE.md
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: n/a — documentation task
+  green: b9d62e7
+  refactor: skipped — doc-only
 notes: Ordered last so it documents the actual final command name/behavior from T005/T006, not a
   guess.
 ```
