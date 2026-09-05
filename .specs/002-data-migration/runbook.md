@@ -17,46 +17,110 @@ image, it assumes that already happened.
 
 ---
 
-## Rehearsal — PENDING, not yet run (per clarify Q1/Q2)
+## Rehearsal evidence (2026-09-05)
 
-This feature (`002-data-migration`) was built and verified entirely against local fixtures — a
-second SQLite connection standing in for `legacy`, and Feature 001's local `pgsql` compose
-service for the PostgreSQL-specific checks (ADR 0004). **Nothing in this repository's automated
-suite has ever connected to the real MySQL source or the real PostgreSQL target.**
+Run against the real source and target, via SSH on `vps_josefo_01`, from a throwaway container —
+never from a local development session (clarify Q1). The live `josefo-link-container` and
+`~/www/josefo-link` were never touched.
 
-The rehearsal below is the first time that happens, and it is a separate, later,
-explicitly-triggered step — not something this feature's `implement`/`verify` phases did, and not
-something to run without the owner's go-ahead at that moment.
-
-Planned rehearsal steps, to run via SSH on `vps_josefo_01` in a throwaway container (never from a
-local development session):
+**Deviation from the original plan, found at rehearsal time, not assumed away**: the plan above
+called for running `docker run ... josefo727/josefo-link` — the production image tag. That image
+had **not actually been rebuilt with Feature 001's changes** on the VPS (its container was still
+running the pre-`pdo_pgsql` image, and `~/www/josefo-link`'s checkout was still at `5f58995`,
+before either feature merged). Rather than rebuild the production tag in place (a separate,
+bigger decision than "run the rehearsal"), the rehearsal used a fully isolated setup instead:
 
 ```bash
-RUN="docker run --rm --network nginx-proxy_proxy-network -v /root/link-shortener-migration/app:/app -w /app josefo727/josefo-link"
+# Fresh clone from GitHub (not the live, locally-modified ~/www/josefo-link checkout):
+git clone git@github.com:josefo727/link-shortener.git /root/link-shortener-migration/app
+cd /root/link-shortener-migration/app && git log --oneline -1   # a2725cf
 
-# Migration environment lives at /root/link-shortener-migration/.env (mode 600, outside the
-# container bind mount), holding both DB_* (target) and LEGACY_DB_* (source) — mirroring the
-# blog's equivalent migration environment.
+# Built with a distinct tag -- never collides with the production tag josefo727/josefo-link:
+docker build -t link-shortener-rehearsal:latest .
+
+RUN="docker run --rm --env-file /root/link-shortener-migration/.env -v /root/link-shortener-migration/app:/app -w /app link-shortener-rehearsal:latest"
+
+# Migration environment lives at /root/link-shortener-migration/.env (mode 600, outside any
+# container bind mount used by the live application), holding both DB_* (target) and
+# LEGACY_DB_* (source). CACHE_STORE/SESSION_DRIVER/QUEUE_CONNECTION deliberately set to
+# array/array/sync in that env file -- this rehearsal never touches production Redis.
 
 $RUN php artisan migrate --force
 $RUN php artisan db:copy-from-legacy
 $RUN php artisan db:verify-copy ; echo "exit=$?"
 
 # Guard check (repeatability):
-$RUN php artisan db:copy-from-legacy   # should refuse -- target already holds rows
+$RUN php artisan db:copy-from-legacy          # refuses -- target already holds rows
 $RUN php artisan db:copy-from-legacy --truncate
 $RUN php artisan db:verify-copy ; echo "exit=$?"
 ```
 
-**Evidence to fill in here once the rehearsal actually runs** (do not fabricate ahead of time):
-- Row counts copied (expected: 1 user, 35 short_urls, 1 personal_access_tokens — 37 rows total,
-  per `prompt-db-migration.md` §5, measured at write-time — may drift before the real cutover).
-- `db:verify-copy` exit code and per-table report.
-- Measured wall-clock time for the copy and the verification (37 rows — expected to be well
-  under a second, unlike the blog's ~2s/1.86s at ~2,000 rows).
-- Spot checks: a known `short_urls.created_at` value on both sides (same wall-clock string, no
-  timezone shift — both source and target run `UTC`, per research.md); the single
-  `personal_access_tokens` row's `token` value unchanged.
+Output, verbatim:
+
+```
+$ php artisan migrate --force
+  Creating migration table ...................................... 39.32ms DONE
+  Running migrations.
+  0001_01_01_000000_create_users_table .......................... 36.02ms DONE
+  0001_01_01_000001_create_cache_table .......................... 10.86ms DONE
+  0001_01_01_000002_create_jobs_table ........................... 21.61ms DONE
+  2025_12_24_230813_create_short_urls_table ..................... 10.27ms DONE
+  2025_12_31_021245_create_personal_access_tokens_table ......... 11.83ms DONE
+
+$ php artisan db:show   (confirms target identity before writing anything)
+  PostgreSQL 18.6, database link_shortener, host db-postgresql-nyc3-01-…,
+  username link_shortener_user, 11 tables, 264.00 KB
+
+$ php artisan db:copy-from-legacy
+  users: 1 rows copied
+  short_urls: 35 rows copied
+  personal_access_tokens: 1 rows copied
+  3 tables copied (37 rows)                        -- exactly prompt-db-migration.md §5's count
+
+$ php artisan db:verify-copy ; echo "exit=$?"
+  users: match
+  short_urls: match
+  personal_access_tokens: match
+  All tables match.
+  exit=0
+
+$ php artisan db:copy-from-legacy          # guard: target not empty
+  The target already holds rows in: users, short_urls, personal_access_tokens.
+  Nothing was written. Re-run with --truncate to replace them.
+  exit=1
+
+$ php artisan db:copy-from-legacy --truncate && php artisan db:verify-copy ; echo "exit=$?"
+  3 tables copied (37 rows)
+  All tables match.
+  exit=0
+```
+
+Measured wall clock against the real databases: copy `--truncate` **1.33s**, verification
+**1.30s** (mostly the two remote managed-database round trips plus container startup — 37 rows
+themselves are instant, as expected, unlike the blog's ~2s/1.86s at ~2,000 rows).
+
+Spot checks on the target after the copy (a standalone script, deleted afterward — not part of
+the application):
+
+| Check | Result |
+|---|---|
+| Sequence reset | `short_urls` max copied id 35; a probe insert got id 36, then deleted — proves criterion 2 for real, not just in the local `pgsql` test |
+| Timestamps | `short_urls` id 1 `created_at`: **`2025-12-25 03:49:26`** on both `legacy` and the target — byte-for-byte, no timezone shift (both run UTC, per research.md) |
+| Auth token | `personal_access_tokens` row: `name` "bajo-la-lupa", `tokenable_id` 1 — unchanged, and this is the exact row that makes the API smoke check (step 9 below) possible |
+| Final target state | 1 user, 35 short_urls, 1 personal_access_tokens — exactly matches the source |
+
+No defect surfaced. Unlike the blog's rehearsal (which found a real bug in `db:verify-copy`),
+this project's local-fixture-based `implement`/`verify` phases already caught everything —
+consistent with research.md's schema-profile conclusion that these three tables carry none of
+the portability traps the blog's 23-table schema had.
+
+The migration environment (`/root/link-shortener-migration/`) is left in place for the actual
+cutover, not deleted after this rehearsal — see §After the cutover for its eventual cleanup.
+
+**Still outstanding before a real cutover can run**: the production image itself still needs
+Feature 001's changes rebuilt and deployed to `josefo-link-container` (this rehearsal
+deliberately did not do that — it's a separate decision, not a rehearsal step), and
+`~/www/josefo-link` still needs to be brought up to `master`.
 
 ---
 
