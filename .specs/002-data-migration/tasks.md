@@ -234,11 +234,11 @@ F: extract the per-table comparison into a small value object/array if the colle
 files:
   - app/Console/Commands/VerifyLegacyCopyCommand.php
   - tests/Feature/Database/VerifyLegacyCopyCommandTest.php
-status: open
+status: closed
 commits:
-  red:
-  green:
-  refactor:
+  red: fb4fd8f
+  green: 982dd4b
+  refactor: skipped — no smell detected, Pint/PHPStan clean
 notes:
 ```
 
